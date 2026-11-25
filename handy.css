@@ -56,3 +56,16 @@ body.hd-3d #gl { display: block; }
   #ships .cs-side { max-height: 28vh; }
   #chess .cs-side, #pong .cs-side { max-height: 34vh; }
 }
+
+/* Lobby (seit 2026-11-25): Online mit mehreren Handys */
+.hd-online { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; margin-top: 8px; padding: 12px 14px; border: 0; border-radius: 12px; text-align: left; color: #fff;
+  background: linear-gradient(160deg, #2b6fd6 0, #1a2a55 80%); box-shadow: inset 0 0 0 1px rgba(120, 180, 255, .6), 0 4px 14px rgba(0, 0, 0, .3); }
+.hd-online b { font: 700 16px/1.2 var(--schrift); }
+.hd-online small { color: #d4e2ff; font: 400 12.5px/1.3 var(--schrift); }
+.hd-online:active { transform: scale(.98); }
+#join { align-items: flex-start; overflow-y: auto; padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)); }
+#join .panel { width: min(640px, 100%); max-width: 100%; box-sizing: border-box; margin: auto 0; }
+#join .mpcols { flex-direction: column; grid-template-columns: 1fr; }
+#join .mpinput, #join button { min-height: 44px; font-size: 16px; }
+#join .mpslot { flex-wrap: wrap; }
+#join kbd { display: none; }

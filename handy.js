@@ -1,13 +1,14 @@
 // Theos Seitenscheidel - Handy-Version als Webseite (Lennox, 2026-11-24): die Schul-Spiele für unterwegs.
 // Dieselben Spiel-Module wie am PC (Stapelturm, Dino-Lauf, Dreierschach, Quadrat-Pong, Schiffe versenken), dazu Touch-Knöpfe und eine Startseite.
-// Online-Mehrspieler gibt es hier noch nicht. Die Rangliste steht nur auf diesem Handy.
+// Seit 2026-11-25 mit Lobby: Schach, Pong und Schiffe online mit mehreren Handys (und mit dem PC, wenn die Version gleich ist). Dieselbe Lobby wie am PC (mp.js).
 import * as THREE from './js/vendor/three.module.min.js';
 import { createDino } from './js/dino.js';
 import { createStapel } from './js/stapel.js';
 import { createChess } from './js/chess.js';
 import { createPong } from './js/pong.js';
 import { createShips } from './js/ships.js';
-import { SCHUL_SPIELE, trageEin, rangliste, sauberesBuch } from './js/schulrang.js';
+import { SCHUL_SPIELE, trageEin, rangliste, sauberesBuch, mische } from './js/schulrang.js';
+import { createMp } from './js/mp.js';
 
 const VERSION = '1.24.0';
 const $ = (id) => document.getElementById(id);
@@ -16,7 +17,7 @@ const G = { mode: 'menu', screen: 'home' };
 $('hdVersion').textContent = VERSION;
 
 // ---------------- Bildschirme ----------------
-const SCREENS = ['home', 'rang', 'chess', 'pong', 'ships', 'dino', 'stapel'];
+const SCREENS = ['home', 'rang', 'chess', 'pong', 'ships', 'dino', 'stapel', 'join'];
 let chess = null; let pong = null; let ships = null;
 function showScreen(name) {
   if (name === 'gallery' || name === 'start' || name === 'menu' || !name) name = 'home';
@@ -59,7 +60,7 @@ function zeigeRang(spiel = 'stapel') {
     li.append(el('b', '', q.platz ? `${q.platz}.` : '–'), el('span', '', q.name + (q.ich ? ' (du)' : '')), el('em', '', q.wert ? S.einheit(q.wert) : 'noch nichts'));
     ol.append(li);
   }
-  box.append(reiter, ol, el('p', 'srrang-info', 'Hier steht nur, was auf diesem Handy gespielt wurde. Siege zählen bei Pong, Schach und Schiffen gegen die KI.'));
+  box.append(reiter, ol, el('p', 'srrang-info', 'Hier steht, was dieses Handy kennt. Spielt ihr zusammen in einer Lobby, tauschen alle ihre Rekorde aus. Siege zählen bei Pong, Schach und Schiffen gegen die KI oder online.'));
 }
 $('hdRangZu').onclick = () => showScreen('home');
 
@@ -85,6 +86,28 @@ for (const sm of document.querySelectorAll('.cards [data-who="local"] small')) s
 for (const b of document.querySelectorAll('[data-who="local"] b')) b.textContent = 'Zu dritt am Handy';
 for (const p of document.querySelectorAll('.cs-mphint')) p.remove();
 
+// ---------------- Lobby: mit mehreren Handys spielen ----------------
+// Dieselbe Lobby wie am PC. Die PC-Spiele, die es hier nicht gibt, sind leere Platzhalter, damit mp.js nichts vermisst.
+const leer = () => ({ active: () => false, stop() {}, startCoop() {}, playerJoined() {}, playerLeft() {}, message() {} });
+const SPIELE = { chess, pong, ships };
+function openMenu() { for (const g of Object.values(SPIELE)) if (g.active()) g.stop(); if (dino.active()) dino.stop(); if (stapel.active()) stapel.stop(); zurueck(); }
+const mp = createMp({
+  schulbuch: { holen: () => buch(), mischen: (b) => { store.set('schulBuch', mische(buch(), b)); zeigeRekorde(); } },
+  $, toast, store, chess, pong, ships, moon: leer(), park: leer(), raus: leer(), baron: leer(), kraft: leer(), casino: leer(), strom: leer(), bruno: leer(), ozean: leer(), saege: leer(),
+  race: { active: false, end() {} }, showScreen, openMenu, openRoadmap() {}, startRace() {},
+  transport: window.__theosTransport, // nur für Tests (Ersatz-Netz zwischen zwei Browser-Tabs), sonst PeerJS wie am PC
+});
+$('mpName').addEventListener('change', () => { $('hdName').value = store.get('mpName', 'Spieler') === 'Spieler' ? '' : store.get('mpName', 'Spieler'); });
+$('jBack').onclick = () => mp.back();
+$('mpStart').onclick = () => mp.startSession();
+// In jedem Online-fähigen Spiel ein dritter Weg unter „Wer spielt?“: Online mit Freunden
+for (const [mode, wer] of [['chess', 'csWho'], ['pong', 'pgWho'], ['ships', 'shWho']]) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'hd-online'; b.dataset.hdOnline = mode;
+  b.innerHTML = '<b>Online mit Freunden</b><small>Lobby erstellen oder beitreten, jeder auf seinem Handy</small>';
+  b.onclick = () => { SPIELE[mode].stop(); $('mpName').value = name(); mp.openFor(mode, { onBack: () => SPIELE[mode].open() }); };
+  $(wer).after(b);
+}
+
 // Pong: zwei große Pfeile unten (dieselben Tasten wie am PC)
 for (const b of $('pgPad').querySelectorAll('button')) {
   const send = (type) => window.dispatchEvent(new KeyboardEvent(type, { code: b.dataset.key, key: b.dataset.key, bubbles: true }));
@@ -102,6 +125,8 @@ history.replaceState({ s: 'home' }, '');
 function merke() { if (G.screen !== 'home' && (!history.state || history.state.s !== 'spiel')) history.pushState({ s: 'spiel' }, ''); }
 window.addEventListener('popstate', () => {
   if (G.screen === 'home') return; // auf der Startseite verlässt Zurück die Seite wie gewohnt
+  if (G.screen === 'join') { mp.back(); return; } // aus der Lobby: zurück ins Spielmenü
+  if (mp.inSession) { for (const g of Object.values(SPIELE)) if (g.active()) g.stop(); mp.hostEnds(); return; } // Online-Partie: Host holt alle in die Lobby, Gast verlässt sie
   if (dino.active()) dino.stop(); if (stapel.active()) stapel.stop(); if (chess.active()) chess.stop(); if (pong.active()) pong.stop(); if (ships.active()) ships.stop();
   zurueck();
 });
@@ -121,4 +146,4 @@ showScreen('home');
 
 // Offline: nur auf einer echten Webseite, nicht beim Testen von der Festplatte
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__theosHandy = { G, dino, stapel, chess, pong, ships, showScreen, store, renderer };
+window.__theosHandy = { G, dino, stapel, chess, pong, ships, mp, showScreen, store, renderer };

@@ -28,12 +28,12 @@
     <div class="hd-spiele">
       <button type="button" class="hd-karte" data-spiel="stapel" style="--f:#46e0d0"><b>Stapelturm</b><small>Tippen im richtigen Moment, der Turm wächst.</small><em id="hdRekStapel"></em></button>
       <button type="button" class="hd-karte" data-spiel="dino" style="--f:#7ed957"><b>Dino-Lauf</b><small>Tippen = springen, Knopf halten = ducken.</small><em id="hdRekDino"></em></button>
-      <button type="button" class="hd-karte" data-spiel="chess" style="--f:#d9b46a"><b>Dreierschach</b><small>Schach zu dritt gegen zwei KI-Gegner.</small></button>
-      <button type="button" class="hd-karte" data-spiel="pong" style="--f:#9a6aff"><b>Quadrat-Pong</b><small>Pfeile unten bewegen deinen Schläger.</small></button>
-      <button type="button" class="hd-karte" data-spiel="ships" style="--f:#4a90e8"><b>Schiffe versenken</b><small>Drei Flotten, du wählst dein Ziel.</small></button>
+      <button type="button" class="hd-karte" data-spiel="chess" style="--f:#d9b46a"><b>Dreierschach</b><small>Schach zu dritt, gegen die KI oder online.</small></button>
+      <button type="button" class="hd-karte" data-spiel="pong" style="--f:#9a6aff"><b>Quadrat-Pong</b><small>Pfeile unten bewegen deinen Schläger. Auch online.</small></button>
+      <button type="button" class="hd-karte" data-spiel="ships" style="--f:#4a90e8"><b>Schiffe versenken</b><small>Drei Flotten, du wählst dein Ziel. Auch online.</small></button>
       <button type="button" class="hd-karte" data-spiel="rang" style="--f:#ffc34a"><b>Rangliste</b><small>Theo, Ludi, Bruno und du.</small></button>
     </div>
-    <p id="hdInstall" class="hd-tipp">Tipp: Im Browser-Menü „Zum Startbildschirm hinzufügen“, dann startet Theos wie eine App und läuft auch ohne Internet.</p>
+    <p id="hdInstall" class="hd-tipp">Tipp: Im Browser-Menü „Zum Startbildschirm hinzufügen“, dann startet Theos wie eine App und läuft auch ohne Internet. Für Online-Spiele mit Freunden braucht ihr Internet und dieselbe Version.</p>
   </section>
 
   <section id="rang" class="hd-rang hidden">
@@ -125,6 +125,33 @@
       <p id="spStartRek" class="sc-rek"></p><div class="sc-knoepfe"><button id="spBack" type="button">Zurück</button><button id="spGo" type="button" class="primary">Los</button></div></div></div>
     <div id="spOver" class="sc-over hidden"><div class="sc-karte"><h2>Turm fertig!</h2><p class="sc-gross" id="spOverZahl"></p><p class="sc-rek" id="spOverRek"></p><pre class="sc-rang" id="spOverRang"></pre>
       <div class="sc-knoepfe"><button id="spAgain" type="button" class="primary">Nochmal <kbd>Leertaste</kbd></button></div></div></div>
+  </section>
+  <section id="join" class="screen hidden">
+    <div class="panel wide">
+      <h2 id="mpTitle">Mehrspieler</h2>
+      <div id="mpEntry">
+        <p class="sub">Zusammen spielen, ohne Konto, ohne Router-Einstellungen und ohne Code: Einer erstellt eine Lobby, die anderen sehen sie unter „Offene Lobbys“ und treten per Klick bei.</p>
+        <label class="label" for="mpName">Dein Name</label><input id="mpName" class="mpinput" maxlength="16" value="Spieler" autocomplete="off">
+        <div class="mpcols">
+          <div class="mpbox"><h3>Lobby erstellen</h3><p class="note">Deine Lobby ist öffentlich: Alle, die das Spiel offen haben, sehen sie und können beitreten.</p><button id="mpHost" type="button" class="primary">Lobby erstellen</button></div>
+          <div class="mpbox"><h3>Offene Lobbys</h3><div id="mpOpen" class="mpopen"><p class="note">Noch nicht gesucht.</p></div><button id="mpScan" type="button">Aktualisieren</button></div>
+        </div>
+        <details class="mpcodejoin"><summary>Mit Code beitreten (Notlösung)</summary><label class="note" for="mpCode">Code vom Host eingeben</label><input id="mpCode" class="mpinput" maxlength="14" placeholder="BRUNO-4821" autocomplete="off"><button id="mpJoin" type="button" class="primary">Beitreten</button></details>
+      </div>
+      <div id="mpRoom" class="hidden">
+        <div class="mpcodebar"><div><p id="mpCodeLabel" class="label">Code für deine Freunde</p><p id="mpCodeShow" class="code">BRUNO-0000</p></div><button id="mpCopy" type="button">Code kopieren</button></div>
+        <div id="mpModeRow" class="mprow hidden"><p class="label">Was spielt ihr?</p><div class="seg"><button type="button" id="mpModeRace">Rennen</button><button type="button" id="mpModePark">Parken</button><button type="button" id="mpModeMoon">Moonsweeper 2</button><button type="button" id="mpModeChess">Dreierschach</button><button type="button" id="mpModePong">Quadrat-Pong</button><button type="button" id="mpModeShips">Schiffe versenken</button><button type="button" id="mpModeRaus">Raus mit dir!</button><button type="button" id="mpModeBaron">Besser als Monopoly (Besser als Bruno Referenz)</button><button type="button" id="mpModeSaege" class="mp-dog" aria-label="Hund">Hund</button><button type="button" id="mpModeKraft">Kraftprobe</button><button type="button" id="mpModeCasino">Teo's Casino</button><button type="button" id="mpModeStrom">Strom aus wegen Brunos Geschirrspüler</button><button type="button" id="mpModeBruno">Big Bruno kommt auf die Erde</button><button type="button" id="mpModeOzean">Trockne den Ozean aus</button></div></div>
+        <div id="mpChessRow" class="mprow hidden"><p class="label">Spielende</p><div class="seg"><button type="button" data-end="1">Erstes Matt</button><button type="button" data-end="2">Figuren erben</button><button type="button" data-end="3">Bis zum Letzten</button></div></div>
+        <p id="mpLobbyInfo" class="note"></p>
+        <div id="mpCaSlot" class="mpcaslot hidden"><label for="mpCaSel">Spielstand</label><select id="mpCaSel"></select><button id="mpCaNew" type="button">Neu</button><button id="mpCaRen" type="button">Umbenennen</button><button id="mpCaDel" type="button">Löschen</button><input id="mpCaName" class="hidden" type="text" maxlength="32"><button id="mpCaOk" type="button" class="primary hidden">OK</button><button id="mpCaCancel" type="button" class="hidden">Abbrechen</button></div>
+        <p class="label">Spieler: <span id="mpCount">1</span> von <span id="mpMax">3</span></p>
+        <div id="mpSlots" class="mpslots"></div>
+        <div id="mpRang" class="mprang hidden"><p class="label">Rangliste: wer hat die meisten Pokale?</p><ol id="mpRangListe"></ol></div>
+        <div class="foot"><button id="mpLeave" type="button">Lobby verlassen</button><button id="mpStart" type="button" class="primary">Spiel starten</button></div>
+      </div>
+      <p id="mpStatus" class="mpstatus">Nicht verbunden</p>
+      <div class="foot"><button id="jBack" type="button"><kbd>Esc</kbd>Zurück</button></div>
+    </div>
   </section>
 
   <div class="hd-pad hidden" id="pgPad"><button type="button" data-key="KeyA" aria-label="links">◀</button><button type="button" data-key="KeyD" aria-label="rechts">▶</button></div>
