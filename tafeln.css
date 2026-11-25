@@ -1,0 +1,70 @@
+/* Theos Seitenscheidel - Abstimmung Paket 3: Tafeln im Zimmer (schranktafeln.js), Rangliste in der Lobby, Spielstände in den Einstellungen. */
+
+/* Tafel im Zimmer */
+.srtafel { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 3vh 12px; }
+.srtafel.hidden { display: none; }
+.srtafel.art-neues { background: rgba(7, 9, 16, .55); }
+.srtafel-brett { box-sizing: border-box; width: min(500px, 94vw); max-height: 94vh; display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 14px;
+  border: 8px solid var(--holz); border-radius: 12px; background: var(--blau); color: #fff; box-shadow: inset 0 3px 12px rgba(0, 0, 0, .4), 0 24px 60px rgba(0, 0, 0, .55); }
+.srtafel.art-gestalten .srtafel-brett { width: min(470px, 40vw); min-width: min(380px, 94vw); padding: 12px 16px; }
+.srtafel-brett h2 { width: fit-content; max-width: 100%; margin: 0; padding: 2px 18px 3px; background: var(--krepp); color: var(--tinte); font: 700 24px/1.45 var(--stift); transform: rotate(-.7deg); }
+.srtafel-inhalt { min-height: 0; overflow-y: auto; padding-right: 4px; }
+.srtafel-stand { margin: 4px 0 2px; color: #d5d9ea; font: 400 14px/1.35 var(--schrift); }
+.srtafel-zu { align-self: flex-end; padding: 9px 22px; font-size: 16px; }
+
+.srwahl-reihe h3 { margin: 10px 0 5px; color: var(--gelb); font: 700 15px/1.3 var(--schrift); }
+.srwahl-netz { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.srwahl-netz .srwahl { position: relative; min-width: 0; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 4px;
+  border-radius: 6px; background: var(--blau-tief); box-shadow: none; color: #fff; font: 600 14px/1.15 var(--schrift); text-align: center; white-space: normal; }
+.srwahl-netz .srwahl b { font-weight: 600; overflow-wrap: anywhere; }
+.srwahl-netz .srwahl small { color: #f0c76a; font-size: 12px; }
+.srwahl-netz .srwahl.an { background: var(--gelb); color: var(--tinte); }
+.srwahl-netz .srwahl:disabled { opacity: .6; cursor: default; }
+.srwahl-farbe { position: absolute; left: 6px; top: 6px; width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .35); }
+
+.srneu { padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, .16); }
+.srneu:first-child { border-top: 0; }
+.srneu h3 { margin: 0; font: 700 17px/1.3 var(--schrift); }
+.srneu.oben h3 { color: var(--gelb); font-size: 19px; }
+.srneu small { color: #c9cee2; font: 400 13px/1.3 var(--schrift); }
+.srneu ul { margin: 6px 0 0; padding-left: 20px; }
+.srneu li { margin: 3px 0; font: 400 15px/1.35 var(--schrift); }
+.srneu:not(.oben) li { color: #c9cee2; font-size: 14px; }
+
+/* Rangliste in der Lobby */
+.mprang { margin: 8px 0 0; }
+.mprang.hidden { display: none; }
+.mprang .label { margin: 0 0 3px; }
+.mprang ol { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.mprang li { min-width: 0; display: flex; align-items: center; gap: 8px; padding: 4px 9px; border-radius: 5px; background: var(--blau-tief); font: 400 14px/1.25 var(--schrift); }
+.mprang li.erster { background: var(--gelb); color: var(--tinte); }
+.mprang li b { flex: none; min-width: 22px; }
+.mprang li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.mprang li em { flex: none; font-style: normal; }
+
+/* Mit Rangliste wird die Lobby hoch: auf flachen Bildschirmen enger, und was dann noch fehlt, rollt in der Tafel statt aus dem Bild zu ragen */
+#join .panel { max-height: 96vh; overflow-x: hidden; overflow-y: auto; }
+@media (max-height: 860px) {
+  #join .panel:has(#mpRang:not(.hidden)) { padding-top: 10px !important; padding-bottom: 10px !important; }
+  #join .panel:has(#mpRang:not(.hidden)) > h2 { margin-bottom: 4px; font-size: 20px; line-height: 1.35; }
+  #join .panel:has(#mpRang:not(.hidden)) .code { font-size: 24px; }
+  #join .panel:has(#mpRang:not(.hidden)) .note { margin: 5px 0; font-size: 13px; line-height: 1.3; }
+  #join .panel:has(#mpRang:not(.hidden)) .label { margin-top: 5px; margin-bottom: 3px; }
+  #join .panel:has(#mpRang:not(.hidden)) .mpslots { gap: 3px; }
+  #join .panel:has(#mpRang:not(.hidden)) .mpslot { min-height: 28px; padding: 3px 10px; font-size: 15px; }
+  #join .panel:has(#mpRang:not(.hidden)) .mprang { margin-top: 4px; }
+  #join .panel:has(#mpRang:not(.hidden)) .foot { margin-top: 8px; }
+  #join .panel:has(#mpRang:not(.hidden)) .mpstatus { margin-top: 6px; padding: 4px 10px; font-size: 13px; }
+}
+
+/* Einstellungen: Spielstände */
+.standliste { max-height: 34vh; overflow-y: auto; display: grid; gap: 4px; margin-top: 8px; }
+.standzeile { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 6px; background: var(--blau-tief); }
+.standzeile div { flex: 1; min-width: 0; }
+.standzeile b { display: block; font: 600 16px/1.25 var(--schrift); }
+.standzeile small { color: #c9cee2; font: 400 13px/1.25 var(--schrift); }
+.standzeile button { flex: none; padding: 7px 12px; font-size: 14px; }
+.standfrage { margin-top: 10px; padding: 10px 12px; border: 2px solid var(--gelb); border-radius: 6px; }
+.standfrage.hidden { display: none; }
+.standfrage p { margin: 0 0 8px; font: 400 15px/1.35 var(--schrift); }
+.standfrage .foot { margin-top: 0; }

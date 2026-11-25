@@ -11,7 +11,7 @@ const peerId = (code) => 'bab1-' + normCode(code).toLowerCase();
 // und treten per Klick bei (Code OFFEN-<Platz>). Sind alle Plätze belegt, gibt es wie früher einen Code.
 export const PUB_SLOTS = 6; const verId = (v) => String(v).replace(/[^0-9a-z]/gi, '-');
 export const pubId = (n, v = MP_VERSION) => `bab1-pub-${verId(v)}-${n}`;
-export const pubSlot = (code) => { const m = /^OFFEN-?(\d{1,2})$/.exec(String(code || '').trim().toUpperCase()); return m && +m[1] >= 1 && +m[1] <= PUB_SLOTS ? +m[1] : 0; };
+export const pubSlot = (code) => { const m = /^OFFEN(\d{1,2})$/.exec(String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '')); /* auch „offen 1“ oder „Offen1“ vom Handy */ return m && +m[1] >= 1 && +m[1] <= PUB_SLOTS ? +m[1] : 0; };
 export async function scanLobbies({ transport, version = MP_VERSION, timeout = 5000 } = {}) {
   const probe = (n) => new Promise((res) => {
     let done = false; let c = null; const fin = (v) => { if (done) return; done = true; clearTimeout(to); try { c && c.close(); } catch (e) { /* weg */ } res(v); }; const to = setTimeout(() => fin(null), timeout);
@@ -126,7 +126,7 @@ export function createNet({ transport, version = MP_VERSION, now = () => Date.no
 
   // ---- Client
   N.join = async (code, name) => {
-    if (N.role) throw new Error('Schon in einer Lobby'); const slot = pubSlot(code); code = slot ? 'OFFEN-' + slot : normCode(code); if (!slot && !/^(THEO|BRUNO|BASTARD|GEIL)-\d{4}$/.test(code)) { status('Ungültiger Code: Es gibt nur THEO, BRUNO, BASTARD oder GEIL mit vier Ziffern (Beispiel: BRUNO-4821)', 'error'); throw new Error('Ungültiger Code'); }
+    if (N.role) throw new Error('Schon in einer Lobby'); const slot = pubSlot(code); code = slot ? 'OFFEN-' + slot : normCode(code); if (!slot && !/^(THEO|BRUNO|BASTARD|GEIL)-\d{4}$/.test(code)) { status('Ungültiger Code: Es gibt OFFEN mit Zahl (Beispiel: OFFEN-1) oder THEO, BRUNO, BASTARD, GEIL mit vier Ziffern (Beispiel: BRUNO-4821)', 'error'); throw new Error('Ungültiger Code'); }
     status('Verbinde mit ' + code + ' …');
     let conn; try { conn = await transport.connect(slot ? pubId(slot, version) : peerId(code)); } catch (e) { const t = String(e && (e.type || e.message || e)); status(/unavailable/.test(t) ? 'Diese Lobby gibt es nicht (Code prüfen, Host muss online sein)' : /timeout/.test(t) ? 'Zeitüberschreitung – Verbindung nicht möglich (Firewall/Netzwerk?)' : 'Verbindung fehlgeschlagen: ' + t, 'error'); throw e; }
     conn = wrapConn(conn);

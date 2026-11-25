@@ -1,0 +1,16 @@
+{
+  "name": "Theos Seitenscheidel",
+  "short_name": "Theos",
+  "description": "Die Schul-Spiele aus Theos Seitenscheidel fürs Handy: Stapelturm, Dino-Lauf, Dreierschach, Pong, Schiffe versenken.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e1a",
+  "theme_color": "#0b0e1a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

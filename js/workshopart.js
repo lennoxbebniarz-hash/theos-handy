@@ -1,0 +1,55 @@
+// Theos Seitenscheidel - Bauteile der Werkstatt als erkennbare Modelle: dieselben Formen liegen als Ersatzteil auf der Ablage und sitzen eingebaut im Motorraum.
+// Alles aus Grundformen: art(id, mk) ruft mk(geometrie, farbe, x, y, z, [rx, ry, rz]) für jedes Stück auf. Die Hitboxen sind eigene unsichtbare Quader in workshop.js.
+import * as THREE from './vendor/three.module.min.js';
+
+const V2 = (x, y) => new THREE.Vector2(x, y); const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const cyl = (r0, r1, h, seg = 24) => new THREE.CylinderGeometry(r0, r1, h, seg); const box = (w, h, d) => new THREE.BoxGeometry(w, h, d); const tor = (r, t, seg = 28) => new THREE.TorusGeometry(r, t, 10, seg);
+const lathe = (pts, seg = 28) => new THREE.LatheGeometry(pts.map((p) => V2(p[0], p[1])), seg); const tube = (pts, r, seg = 24, rad = 8) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((p) => V3(p[0], p[1], p[2]))), seg, r, rad);
+function helix(r, h, turns, t) { const pts = []; const n = Math.round(turns * 16); for (let i = 0; i <= n; i++) { const a = i / 16 * 6.283; pts.push(V3(Math.cos(a) * r, -h / 2 + h * i / n, Math.sin(a) * r)); } return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n * 2, t, 7); }
+// Schneckengehäuse: Kreis wird entlang einer Spirale größer
+function snail(r0, r1, turns, hub) { const n = 56; const ring = 10; const pos = []; const idx = []; for (let i = 0; i <= n; i++) { const t = i / n; const a = t * turns * 6.283; const rs = r0 + (r1 - r0) * t; const rc = hub + rs * 0.9; for (let k = 0; k <= ring; k++) { const q = k / ring * 6.283; const c = Math.cos(q); pos.push(Math.cos(a) * (rc + c * rs), Math.sin(a) * (rc + c * rs), Math.sin(q) * rs); } } for (let i = 0; i < n; i++) for (let k = 0; k < ring; k++) { const a = i * (ring + 1) + k; const b = a + ring + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(pos.length / 3 * 2), 2)); return g; }
+function gear(rOut, rIn, teeth, depth) { const s = new THREE.Shape(); for (let i = 0; i < teeth * 2; i++) { const a = i / (teeth * 2) * 6.283; const r = i % 2 ? rIn : rOut; const x = Math.cos(a) * r; const y = Math.sin(a) * r; if (i) s.lineTo(x, y); else s.moveTo(x, y); } s.closePath(); const h = new THREE.Path(); h.absarc(0, 0, rIn * 0.34, 0, 6.283, true); s.holes.push(h); return new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false }); }
+
+const ALU = 0x74787e; const DARK = 0x26282c; const RUB = 0x121214; const BRASS = 0xb08a3a;
+export const ART = {
+  // Motoröl: Kanister mit Griff, Ölkanne auf dem Etikett
+  oil(mk) { mk(box(0.11, 0.17, 0.07), 0xd9a521, 0, 0.085, 0); mk(tube([[-0.035, 0.17, 0], [-0.035, 0.205, 0], [0.0, 0.215, 0], [0.012, 0.18, 0]], 0.009, 14), 0xd9a521, 0, 0, 0); mk(cyl(0.02, 0.022, 0.03), RUB, 0.03, 0.185, 0); mk(box(0.085, 0.09, 0.002), 0x1c1c20, 0, 0.08, 0.0361); mk(box(0.05, 0.016, 0.002), 0xd9a521, 0, 0.09, 0.0375); },
+  // Kühlmittel: Kanister in Türkis mit Schraubdeckel
+  coolant(mk) { mk(lathe([[0, 0], [0.055, 0], [0.06, 0.012], [0.06, 0.13], [0.04, 0.165], [0.024, 0.175], [0.024, 0.19], [0, 0.19]]), 0x17a7b4, 0, 0, 0); mk(cyl(0.028, 0.03, 0.028), 0xe8e4d4, 0, 0.2, 0); mk(cyl(0.0605, 0.0605, 0.05), 0xe8e4d4, 0, 0.075, 0); },
+  sealant(mk) { mk(cyl(0.02, 0.024, 0.13), 0xece9df, 0, 0.065, 0); mk(cyl(0.024, 0.024, 0.012), 0xc23a22, 0, 0.012, 0); mk(cyl(0.004, 0.012, 0.05), 0xc23a22, 0, 0.155, 0); },
+  // Kraftstoffpumpe: Rippenkörper, Druckregler, Anschlüsse rot/blau, Stecker
+  fuelpump(mk) { mk(cyl(0.046, 0.046, 0.16), 0x4f5358, 0, 0.055, 0, 0, 0, 1.5708); for (let i = 0; i < 6; i++) mk(tor(0.047, 0.004, 24), 0x8a8e94, -0.06 + i * 0.024, 0.055, 0, 0, 1.5708, 0); mk(cyl(0.03, 0.046, 0.03), 0x8a2a1c, 0.094, 0.055, 0, 0, 0, 1.5708); mk(cyl(0.012, 0.012, 0.03), 0xc23a22, 0.122, 0.055, 0, 0, 0, 1.5708); mk(cyl(0.015, 0.015, 0.012, 6), 0xc23a22, 0.14, 0.055, 0, 0, 0, 1.5708); mk(cyl(0.03, 0.046, 0.03), 0x1e3a78, -0.094, 0.055, 0, 0, 0, -1.5708); mk(cyl(0.012, 0.012, 0.03), 0x2a62d9, -0.122, 0.055, 0, 0, 0, 1.5708); mk(cyl(0.015, 0.015, 0.012, 6), 0x2a62d9, -0.14, 0.055, 0, 0, 0, 1.5708); mk(box(0.04, 0.03, 0.03), RUB, 0, 0.105, 0); mk(box(0.1, 0.012, 0.09), DARK, 0, 0.004, 0); },
+  // Turbolader: zwei Schnecken, Welle, Einlauf, Wastegate
+  turbo(mk) { const y = 0.1; mk(snail(0.02, 0.05, 0.92, 0.046), 0x5a4f46, 0, y, -0.05); mk(cyl(0.05, 0.05, 0.05), 0x4a403a, 0, y, -0.05, 1.5708, 0, 0); mk(snail(0.02, 0.055, 0.94, 0.052), 0x8f9398, 0, y, 0.05); mk(cyl(0.052, 0.052, 0.05), 0x7f8388, 0, y, 0.05, 1.5708, 0, 0); mk(lathe([[0, 0.02], [0.03, 0.02], [0.056, 0], [0.066, -0.014]], 30), 0x9fa3a8, 0, y, 0.082, 1.5708, 0, 0); mk(cyl(0.036, 0.036, 0.05), BRASS, 0, y, 0, 1.5708, 0, 0); mk(cyl(0.038, 0.044, 0.05), 0x8f9398, 0, y, 0.11, 1.5708, 0, 0); mk(tor(0.042, 0.005), 0xb8bcc2, 0, y, 0.13); mk(cyl(0.024, 0.028, 0.05), 0xa81a12, 0.03, y + 0.085, -0.03); mk(tube([[0.09, y + 0.03, 0.05], [0.14, y + 0.03, 0.05], [0.15, y + 0.05, 0.04]], 0.024, 12), 0x8f9398, 0, 0, 0); },
+  // Bremsbeläge: Trägerplatte und Reibbelag
+  brakepads(mk) { for (const y of [0.012, 0.05]) { mk(box(0.13, 0.008, 0.075), 0x8a8e94, 0, y, 0); mk(box(0.116, 0.016, 0.06), 0x2c2622, 0, y + 0.012, 0); } mk(box(0.03, 0.05, 0.004), 0xc23a22, 0.05, 0.03, 0.04); },
+  // Reifen mit Felge
+  tire(mk) { const y = 0.3; mk(tor(0.2, 0.082, 36), RUB, 0, y, 0, 0, 1.5708, 0); mk(cyl(0.14, 0.14, 0.1, 30), 0x9a9ea3, 0, y, 0, 0, 0, 1.5708); mk(cyl(0.05, 0.05, 0.12, 16), DARK, 0, y, 0, 0, 0, 1.5708); for (let i = 0; i < 5; i++) { const a = i * 1.2566; mk(cyl(0.011, 0.011, 0.125, 6), 0xc8ccd2, 0, y + Math.cos(a) * 0.085, Math.sin(a) * 0.085, 0, 0, 1.5708); } },
+  // Lenkgetriebe: Zahnstange, Faltenbälge, Spurstangen
+  steerkit(mk) { mk(cyl(0.022, 0.022, 0.2), 0x6f7277, 0, 0.04, 0, 0, 0, 1.5708); for (const s of [1, -1]) { for (let i = 0; i < 4; i++) mk(tor(0.024, 0.007, 16), RUB, s * (0.115 + i * 0.012), 0.04, 0, 0, 1.5708, 0); mk(cyl(0.008, 0.008, 0.08), 0x9fa3a8, s * 0.195, 0.04, 0, 0, 0, 1.5708); mk(cyl(0.016, 0.016, 0.018), 0xb08a3a, s * 0.24, 0.04, 0); } mk(cyl(0.028, 0.028, 0.05), 0x4f5358, 0.03, 0.07, 0); },
+  // Getriebe-Set: zwei Zahnräder und Welle
+  gearkit(mk) { mk(gear(0.07, 0.056, 16, 0.024), 0x8a8e94, -0.03, 0.09, 0, 0, 0, 0); mk(gear(0.045, 0.034, 11, 0.024), 0xb08a3a, 0.07, 0.07, 0, 0, 0, 0); mk(cyl(0.012, 0.012, 0.09), 0xb8bcc2, -0.03, 0.09, 0.012, 1.5708, 0, 0); mk(box(0.2, 0.012, 0.08), DARK, 0.01, 0.006, 0.01); },
+  fuse(mk) { [0xe34b3a, 0xf2c14e, 0x4aa3df].forEach((c, i) => { const x = -0.04 + i * 0.04; mk(box(0.03, 0.03, 0.012), c, x, 0.05, 0); mk(box(0.02, 0.006, 0.013), 0xf4f1e6, x, 0.06, 0); for (const s of [-1, 1]) mk(box(0.006, 0.024, 0.003), 0xc8ccd2, x + s * 0.008, 0.024, 0); }); },
+  // Luftfilter: Faltenkegel mit Gummifuß
+  filter(mk) { const y = 0.075; for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283; mk(box(0.15, 0.012, 0.012), i % 2 ? 0xc23a22 : 0x9a2a1c, 0, y + Math.cos(a) * 0.062, Math.sin(a) * 0.062, a, 0, 0); } mk(cyl(0.066, 0.066, 0.015), DARK, 0.078, y, 0, 0, 0, 1.5708); mk(cyl(0.05, 0.05, 0.14), 0x8f2a1c, 0, y, 0, 0, 0, 1.5708); mk(cyl(0.05, 0.066, 0.02), DARK, -0.08, y, 0, 0, 0, 1.5708); mk(cyl(0.05, 0.05, 0.05), RUB, -0.112, y, 0, 0, 0, 1.5708); mk(tor(0.052, 0.005), 0xb8bcc2, -0.11, y, 0, 0, 1.5708, 0); },
+  // Kühler: Lamellen, Wasserkästen, Deckel
+  radiator(mk) { const w = 0.3; const h = 0.2; mk(box(w, h, 0.03), 0x34373c, 0, h / 2 + 0.02, 0); for (let i = 0; i < 12; i++) mk(box(w - 0.01, 0.006, 0.034), 0x8a8e94, 0, 0.03 + i * 0.0165, 0); for (const s of [1, -1]) mk(box(0.024, h + 0.02, 0.05), 0x6f7277, s * (w / 2 + 0.012), h / 2 + 0.02, 0); mk(cyl(0.018, 0.022, 0.018), 0xb8bcc2, w / 2 + 0.012, h + 0.04, 0); },
+  nitro(mk) { mk(lathe([[0, 0], [0.042, 0], [0.046, 0.012], [0.046, 0.25], [0.034, 0.285], [0.018, 0.3], [0, 0.3]]), 0x1e4ec0, 0, 0, 0); mk(cyl(0.012, 0.016, 0.03), 0xb8bcc2, 0, 0.315, 0); mk(cyl(0.024, 0.024, 0.012), 0xc23a22, 0, 0.335, 0); mk(cyl(0.047, 0.047, 0.05), 0xf0ece0, 0, 0.14, 0); },
+  battery(mk) { mk(box(0.2, 0.13, 0.12), 0x22242a, 0, 0.065, 0); mk(box(0.205, 0.022, 0.125), 0x3a3e45, 0, 0.14, 0); mk(cyl(0.014, 0.016, 0.022), 0xc23a22, -0.065, 0.16, 0); mk(cyl(0.014, 0.016, 0.022), 0x8a8e94, 0.065, 0.16, 0); mk(box(0.14, 0.05, 0.002), 0xf2c14e, 0, 0.075, 0.0605); },
+  routerpsu(mk) { mk(box(0.09, 0.05, 0.06), 0x1d1d1f, 0, 0.025, 0); mk(box(0.025, 0.02, 0.03), 0xc8ccd2, 0.06, 0.025, 0); mk(tube([[-0.045, 0.02, 0], [-0.08, 0.012, 0.02], [-0.1, 0.03, 0.05], [-0.07, 0.05, 0.07]], 0.004, 14, 6), 0x101012, 0, 0, 0); mk(box(0.012, 0.006, 0.012), 0x1aff5a, -0.02, 0.052, 0); },
+};
+// Eingebaute Teile
+export const FIT = {
+  // Öleinfüllstutzen mit gelbem Deckel und Peilstab
+  oilcap(mk) { mk(cyl(0.032, 0.04, 0.05), ALU, 0, 0.0, 0); mk(cyl(0.042, 0.042, 0.022, 8), 0xd9a521, 0, 0.034, 0); mk(cyl(0.024, 0.024, 0.008), 0x1c1c20, 0, 0.048, 0); mk(cyl(0.005, 0.005, 0.12), 0x8a8e94, 0.09, 0.0, 0.0); mk(tor(0.018, 0.004, 18), 0xd9a521, 0.09, 0.075, 0); },
+  // Ausgleichsbehälter: durchscheinend mit Pegel
+  coolcap(mk) { mk(box(0.2, 0.12, 0.12), 0xd8e4e4, 0, 0, 0); mk(box(0.205, 0.07, 0.125), 0x14a4b8, 0, -0.024, 0); mk(cyl(0.034, 0.038, 0.03), 0x1e4ec0, 0.05, 0.075, 0); mk(tube([[-0.1, -0.03, 0], [-0.16, -0.04, 0.03], [-0.2, -0.12, 0.06]], 0.012, 14, 8), RUB, 0, 0, 0); for (const y of [-0.04, 0.03]) mk(box(0.04, 0.003, 0.002), 0x101012, -0.06, y, 0.0615); },
+  // Motorlager: Halter und gelbe Buchse
+  mounts(mk) { mk(box(0.1, 0.012, 0.08), 0x4f5358, 0, -0.03, 0); mk(cyl(0.036, 0.042, 0.04), 0xd9a521, 0, 0.0, 0); mk(cyl(0.016, 0.016, 0.03, 6), 0xb8bcc2, 0, 0.03, 0); for (const s of [-1, 1]) mk(cyl(0.008, 0.008, 0.01, 6), 0xb8bcc2, s * 0.038, -0.02, 0.026); },
+  // Bremsscheibe mit Lüftungsschlitzen und rotem Sattel
+  brakedisc(mk) { mk(cyl(0.15, 0.15, 0.03, 40), 0x83878c, 0, 0, 0); mk(cyl(0.06, 0.07, 0.05, 28), 0x3a3e45, 0, 0.012, 0); for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283; mk(box(0.06, 0.004, 0.004), 0x2c2622, Math.cos(a) * 0.105, 0.016, Math.sin(a) * 0.105, 0, -a + 0.5, 0); } for (let i = 0; i < 5; i++) { const a = i * 1.2566; mk(cyl(0.009, 0.009, 0.012, 6), 0xc8ccd2, Math.cos(a) * 0.042, 0.04, Math.sin(a) * 0.042); } mk(box(0.09, 0.07, 0.15), 0xb4180f, 0.135, 0.005, 0); mk(box(0.1, 0.016, 0.04), 0xf0ece0, 0.135, 0.042, 0); },
+  // Federbein: Schraubenfeder um den Dämpfer
+  strut(mk) { mk(helix(0.03, 0.09, 4, 0.0055), 0xd0a31f, 0, 0, 0); mk(cyl(0.012, 0.012, 0.11), 0x9fa3a8, 0, 0, 0); mk(cyl(0.04, 0.04, 0.006), 0x4f5358, 0, 0.05, 0); mk(cyl(0.04, 0.04, 0.006), 0x4f5358, 0, -0.05, 0); },
+  // Getriebegehäuse mit Rippen
+  gearbox(mk) { mk(box(0.2, 0.08, 0.14), 0x6f7277, 0, 0, 0); for (let i = 0; i < 6; i++) mk(box(0.008, 0.085, 0.145), 0x4f5358, -0.08 + i * 0.032, 0, 0); mk(cyl(0.05, 0.05, 0.03), 0x4f5358, 0.11, 0, 0, 0, 0, 1.5708); mk(cyl(0.022, 0.022, 0.05), 0xb8bcc2, 0.14, 0, 0, 0, 0, 1.5708); },
+};

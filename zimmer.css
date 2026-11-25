@@ -1,0 +1,57 @@
+/* Theos Seitenscheidel - Schrank-Hub (schrank.js): was über dem 3D-Zimmer liegt.
+   body.hub = das Zimmer ist das Menü. Fehlt die Klasse, zeigt das Spiel die einfache Liste aus style.css. */
+
+body.hub #menu, body.hub #gallery { background: none; pointer-events: none; }
+body.hub .menustack, body.hub .gtitle, body.hub .gitems { display: none; }
+body.hub #gallery .cornerback, body.hub.upopen #upBanner { pointer-events: auto; }
+body.hub #upBanner { display: none; }
+body.hub.upopen #upBanner:not(.hidden) { display: flex; top: auto; right: 3vw; bottom: 17vh; }
+
+/* Kärtchen am Gegenstand */
+.srcard { position: fixed; left: 0; top: 0; z-index: 11; width: max-content; max-width: min(300px, 40vw); display: flex; flex-direction: column; gap: 3px; padding: 10px 15px 11px; border-radius: 3px; pointer-events: none;
+  background: var(--krepp); color: var(--tinte); box-shadow: 0 10px 26px rgba(0, 0, 0, .5); font: 400 14px/1.35 var(--schrift-zimmer); }
+.srcard b { font: 700 18px/1.4 var(--stift); }
+.srcard em { font-style: normal; font-weight: 700; }
+.srcard span { color: #55463d; }
+.srcard u { align-self: flex-start; margin-top: 2px; padding: 1px 9px; border-radius: 3px; background: #b77b10; color: #fff; font-weight: 700; text-decoration: none; }
+.srcard i { align-self: flex-start; margin-top: 2px; padding: 2px 9px; border-radius: 3px; background: #b92a68; color: #fff; font-style: normal; font-weight: 700; }
+
+/* Hinweis unter den Klinken, gehört zum Tutorial */
+.srhint { position: fixed; left: 0; top: 0; z-index: 11; margin: 0; max-width: 90vw; transform: translate(-50%, -50%); padding: 4px 18px 6px; pointer-events: none;
+  background: var(--krepp); color: var(--tinte); box-shadow: 0 8px 22px rgba(0, 0, 0, .45); font: 700 clamp(14px, 2.3vh, 22px)/1.45 var(--stift); text-align: center; }
+
+/* Tafeln stehen rechts, links bleibt der Gegenstand zu sehen */
+body.hub #start, body.hub #lobby, body.hub #join { justify-content: flex-end; padding-right: 3.5vw; background: linear-gradient(90deg, rgba(7, 9, 16, 0) 24%, rgba(7, 9, 16, .58) 62%); }
+body.hub #settings { background: rgba(7, 9, 16, .22); }
+body.hub #lobby .panel.wide, body.hub #join .panel.wide { width: min(700px, 94vw); }
+@media (max-width: 1000px) { body.hub #lobby .foot { flex-wrap: wrap; } }
+
+/* Lobby über einem großen Startbildschirm: dort stehen die Figuren rechts, die Tafel gehört nach links */
+@media (min-width: 1100px) {
+  body.hub .tt-cover:not(.hidden) ~ #join { justify-content: flex-start; padding: 0 0 0 2.5vw; background: linear-gradient(90deg, rgba(7, 9, 16, .5) 30%, rgba(7, 9, 16, 0) 56%); }
+  body.hub .tt-cover:not(.hidden) ~ #join .panel.wide { width: min(600px, 43vw); }
+  body.hub .tt-cover:not(.hidden) ~ #join .mpbox { flex-basis: 170px; }
+}
+
+/* dasselbe schmal (800 bis 1099 px): schmalere Tafel links, die Kästen untereinander */
+@media (max-width: 1099.98px) {
+  body.hub .tt-cover:not(.hidden) ~ #join { justify-content: flex-start; padding: 0 0 0 1.5vw; background: linear-gradient(90deg, rgba(7, 9, 16, .5) 30%, rgba(7, 9, 16, 0) 56%); }
+  body.hub .tt-cover:not(.hidden) ~ #join .panel.wide { width: 44vw; max-height: 96vh; overflow-y: auto; padding: 14px 16px; }
+  body.hub .tt-cover:not(.hidden) ~ #join .sub { font-size: 13px; line-height: 1.3; }
+  body.hub .tt-cover:not(.hidden) ~ #join .mpcols { flex-wrap: wrap; gap: 8px; }
+  body.hub .tt-cover:not(.hidden) ~ #join .mpbox { flex: 1 1 100%; min-width: 0; }
+  body.hub .tt-cover:not(.hidden) ~ #join .foot { flex-wrap: wrap; }
+}
+
+/* Startkarte der kleinen Spiele */
+#start .st-card { width: min(580px, 94vw); padding: 20px 24px 18px; border: 8px solid var(--holz); border-radius: 12px; background: var(--blau); box-shadow: inset 0 3px 12px rgba(0, 0, 0, .4), 0 24px 60px rgba(0, 0, 0, .55); }
+#start .st-card::after { display: none; }
+#start .st-card > .label { display: none; }
+#start .st-art { display: none; }
+#start .st-card h2 { width: fit-content; max-width: 100%; margin: 0 0 6px; padding: 2px 18px 3px; background: var(--krepp); color: var(--tinte); font: 700 25px/1.45 var(--stift); transform: rotate(-.7deg); }
+#start .st-card .cs-lead { color: #d5d9ea; }
+#start .st-card .foot { gap: 8px; }
+#start .st-card .foot button { padding: 10px 12px; font-size: 15px; }
+#start .st-card .foot kbd { margin-right: 6px; }
+
+@media (prefers-reduced-motion: reduce) { .bake { animation: none; } #gl { transition: none; } }

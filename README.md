@@ -1,6 +1,6 @@
 # Theos Seitenscheidel – Handy
 
-Die Schul-Spiele aus Theos Seitenscheidel als Webseite fürs Handy: Stapelturm, Dino-Lauf, Dreierschach, Quadrat-Pong, Schiffe versenken und eine Rangliste.
+Theos Seitenscheidel als Webseite fürs Handy: alle Spiele wie am PC, mit Touch-Steuerung. Die leichte Version mit nur den Schul-Spielen liegt unter /schule/.
 
 Spielen: https://lennoxbebniarz-hash.github.io/theos-handy/
 

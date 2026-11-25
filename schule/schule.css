@@ -1,0 +1,56 @@
+/* Theos Seitenscheidel - Schulmodus (2026-11-23): Dino-Lauf, Stapelturm, Rangliste-Tafel, Hinweis oben. Farben aus style.css (Zimmer-Look). */
+
+body:not(.schule) .schul-only { display: none; }
+
+/* Hinweis oben mittig, solange der Schulmodus an ist */
+.schul-badge { position: fixed; z-index: 40; top: 8px; left: 50%; transform: translateX(-50%); padding: 5px 14px 6px; border-radius: 999px;
+  background: rgba(21, 25, 42, .82); color: #d8f5d0; font: 600 13px/1.3 var(--schrift); box-shadow: 0 0 0 1px rgba(126, 217, 87, .45); pointer-events: none; white-space: nowrap; }
+.schul-badge kbd { min-width: 0; padding: 1px 5px 0; font-size: 12px; }
+
+/* Spielfläche: ganzer Bildschirm */
+.sc-spiel { position: fixed; inset: 0; z-index: 5; user-select: none; }
+.sc-spiel canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.sc-3d { pointer-events: none; }
+.sc-3d .sc-over, .sc-3d button, .sc-3d .sc-tap { pointer-events: auto; }
+.sc-tap { position: absolute; inset: 0; }
+
+.sc-hud { position: absolute; left: 18px; top: 14px; display: flex; align-items: baseline; gap: 14px; color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, .45); pointer-events: none; }
+.sc-hud b { font: 800 40px/1 var(--schrift); font-variant-numeric: tabular-nums; }
+.sc-hud span { font: 600 16px/1 var(--schrift); opacity: .85; }
+.sc-hud .sc-weg { position: fixed; right: 16px; top: 14px; pointer-events: auto; padding: 7px 14px; font-size: 14px; opacity: .8; }
+.sc-mitte { left: 0; right: 0; top: 9vh; flex-direction: column; align-items: center; gap: 6px; } /* ohne transform: sonst hängt der Zurück-Knopf (position: fixed) mitten in der Zahl */
+.sc-mitte b { font-size: 88px; }
+.sc-lob { font: 800 22px/1 var(--schrift); color: #fff6c0; opacity: 0; }
+.sc-lob.an { animation: scLob 0.9s ease-out forwards; }
+@keyframes scLob { 0% { opacity: 0; transform: translateY(8px) scale(.9); } 15% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10px); } }
+
+.sc-over { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(8, 10, 20, .45); }
+.sc-karte { box-sizing: border-box; width: min(470px, 94vw); padding: 18px 22px 16px; border: 8px solid var(--holz); border-radius: 12px; background: var(--blau); color: #fff;
+  box-shadow: inset 0 3px 12px rgba(0, 0, 0, .4), 0 24px 60px rgba(0, 0, 0, .55); text-align: center; }
+.sc-karte h2 { display: inline-block; margin: 0 0 8px; padding: 2px 18px 3px; background: var(--krepp); color: var(--tinte); font: 700 26px/1.4 var(--stift); transform: rotate(-.7deg); }
+.sc-karte p { margin: 6px 0; font: 400 15px/1.45 var(--schrift); color: #dfe3f2; }
+.sc-tasten { margin: 8px 0; padding: 0; list-style: none; font: 400 14px/1.9 var(--schrift); color: #dfe3f2; }
+.sc-tasten kbd { min-width: 0; padding: 1px 6px 0; font-size: 12px; }
+.sc-rek { color: var(--gelb) !important; font-weight: 600 !important; }
+.sc-gross { margin: 2px 0 !important; font: 800 52px/1.1 var(--schrift) !important; color: #fff !important; font-variant-numeric: tabular-nums; }
+.sc-over.rekord .sc-karte { border-color: #e0a92a; }
+.sc-over.rekord .sc-rek { animation: scPuls 0.8s ease-in-out infinite alternate; }
+@keyframes scPuls { from { transform: scale(1); } to { transform: scale(1.08); } }
+.sc-rang { margin: 10px auto 4px; padding: 8px 12px; max-width: 320px; border-radius: 8px; background: var(--blau-tief); color: #e8ecf8; font: 500 14px/1.6 var(--schrift); text-align: left; white-space: pre-wrap; }
+.sc-rang:empty { display: none; }
+.sc-knoepfe { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+.sc-knoepfe button { padding: 10px 22px; font-size: 16px; }
+
+/* Rangliste-Tafel im Zimmer */
+.srrang-reiter { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 8px; }
+.srrang-reiter button { padding: 6px 10px; border-radius: 6px; background: var(--blau-tief); box-shadow: none; color: #fff; font: 600 13px/1.2 var(--schrift); }
+.srrang-reiter button.an { background: var(--gelb); color: var(--tinte); }
+.srrang-liste { margin: 0; padding: 0; list-style: none; }
+.srrang-liste li { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font: 500 15px/1.3 var(--schrift); }
+.srrang-liste li:nth-child(odd) { background: rgba(255, 255, 255, .05); }
+.srrang-liste li b { color: #c9cee2; text-align: right; }
+.srrang-liste li.p1 b { color: #ffc34a; } .srrang-liste li.p2 b { color: #c8d0dc; } .srrang-liste li.p3 b { color: #d89a62; }
+.srrang-liste li.ich { box-shadow: inset 0 0 0 2px rgba(126, 217, 87, .6); }
+.srrang-liste li.leer { opacity: .5; }
+.srrang-liste li em { font-style: normal; font-variant-numeric: tabular-nums; color: #fff; }
+.srrang-info { margin: 10px 0 0; color: #c9cee2; font: 400 13px/1.4 var(--schrift); }
