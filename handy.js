@@ -27,7 +27,7 @@ function showScreen(name) {
   if (name !== 'ships' && ships) ships.hide();
   $('pgPad').classList.toggle('hidden', name !== 'pong');
   $('dnDuck').classList.toggle('hidden', name !== 'dino');
-  if (name === 'home') { G.mode = 'menu'; zeigeRekorde(); } else merke(); // jedes geöffnete Spiel bekommt einen Eintrag im Verlauf
+  if (name === 'home') { G.mode = 'menu'; zeigeRekorde(); if (history.state && history.state.s === 'spiel') history.back(); } else merke(); // jedes geöffnete Spiel bekommt einen Eintrag im Verlauf; über den Zurück-Knopf im Spiel verlassen: den Eintrag wieder abbauen (sonst brauchte die Handy-Zurück-Taste danach zwei Drücke)
 }
 let toastT = 0;
 function toast(msg, ms = 2200) { const el = $('hdToast'); el.textContent = msg; el.classList.toggle('hidden', !msg); clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('hidden'), ms); }
