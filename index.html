@@ -1,43 +1,208 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' data: blob: https://0.peerjs.com wss://0.peerjs.com">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#0b0e1a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Theos">
-  <title>Theos Seitenscheidel – Handy</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="theme-color" content="#0b0e1a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Theos">
+  <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="touch.css">
+  <script src="touch.js"></script>
+  <title>Theos Seitenscheidel</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="zimmer.css">
+  <link rel="stylesheet" href="titel.css">
+  <link rel="stylesheet" href="tafeln.css">
   <link rel="stylesheet" href="schule.css">
-  <link rel="stylesheet" href="handy.css">
+  <link rel="stylesheet" href="ludwigextra.css">
 </head>
-<body class="handy schule">
+<body class="hub">
   <canvas id="gl"></canvas>
+  <canvas id="fx" class="fx"></canvas>
 
-  <section id="home" class="hd-home">
-    <header class="hd-kopf">
-      <h1>Theos Seitenscheidel</h1>
-      <p class="hd-unter">Handy-Version · Version <span id="hdVersion"></span></p>
-    </header>
-    <label class="hd-name">Dein Name für die Rangliste <input id="hdName" type="text" maxlength="16" autocomplete="off" placeholder="z. B. Theo"></label>
-    <div class="hd-spiele">
-      <button type="button" class="hd-karte" data-spiel="stapel" style="--f:#46e0d0"><b>Stapelturm</b><small>Tippen im richtigen Moment, der Turm wächst.</small><em id="hdRekStapel"></em></button>
-      <button type="button" class="hd-karte" data-spiel="dino" style="--f:#7ed957"><b>Dino-Lauf</b><small>Tippen = springen, Knopf halten = ducken.</small><em id="hdRekDino"></em></button>
-      <button type="button" class="hd-karte" data-spiel="chess" style="--f:#d9b46a"><b>Dreierschach</b><small>Schach zu dritt gegen zwei KI-Gegner.</small></button>
-      <button type="button" class="hd-karte" data-spiel="pong" style="--f:#9a6aff"><b>Quadrat-Pong</b><small>Pfeile unten bewegen deinen Schläger.</small></button>
-      <button type="button" class="hd-karte" data-spiel="ships" style="--f:#4a90e8"><b>Schiffe versenken</b><small>Drei Flotten, du wählst dein Ziel.</small></button>
-      <button type="button" class="hd-karte" data-spiel="rang" style="--f:#ffc34a"><b>Rangliste</b><small>Theo, Ludi, Bruno und du.</small></button>
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="box"><span class="lbl">Zeit</span><span id="hTime">0:00.0</span></div>
+      <div class="box hidden" id="hLapBox"><span class="lbl">Runde</span><span id="hLap">1/3</span></div>
+      <div class="box hidden" id="hRivalBox"><span class="lbl">Bruno</span><span id="hRival">–</span></div>
+      <div class="box wide" id="hDistBox"><span class="lbl">Strecke</span><div class="bar"><i id="hBar"></i></div><span id="hDist">0 / 0 m</span></div>
+      <div class="box"><span class="lbl">Nitro</span><span id="hNitro">● ● ●  bereit</span></div>
+      <div class="box"><span class="lbl">Motor</span><div class="bar small"><i id="hTemp"></i></div><span id="hDmg">ok</span></div>
+      <div class="box"><span class="lbl">Sicht</span><div class="bar small"><i id="hMud"></i></div></div>
+      <div class="box"><span class="lbl">Rolle</span><span id="hRole">Fahrer</span></div>
     </div>
-    <p id="hdInstall" class="hd-tipp">Tipp: Im Browser-Menü „Zum Startbildschirm hinzufügen“, dann startet Theos wie eine App und läuft auch ohne Internet.</p>
+    <div id="dmgClock" class="dmgclock hidden"><span>Totalschaden in</span><b id="dcNum">30</b><i id="dcName"></i></div>
+    <div id="warnBanner" class="warnbanner hidden"><b id="wbTitle"></b><span id="wbText"></span></div>
+    <div id="hToast" class="toast hidden"></div>
+    <div id="hHint" class="hint"></div>
+    <div id="hBig" class="big hidden"></div>
+  </div>
+
+  <div id="nitroFx" class="nitrofx"></div>
+  <div id="holdRing" class="holdring hidden"></div>
+  <canvas id="engPad" class="engpad hidden" width="400" height="720"></canvas>
+  <div id="crosshair" class="crosshair hidden"><i></i><b></b></div>
+  <div id="shifter" class="shifter hidden"><canvas id="shifterCv" width="320" height="240"></canvas><div class="shhint">Maus bewegen, Gang einrasten, R gedrückt halten</div></div>
+  <div id="gearTag" class="geartag hidden"></div>
+  <div id="tip" class="tip hidden"></div>
+  <canvas id="navPad" class="navpad hidden" width="420" height="620"></canvas>
+
+  <section id="menu" class="screen">
+    <div id="upBanner" class="upbanner hidden"><b id="upTitle"></b><span id="upNotes"></span><div class="upbar hidden"><i id="upBar"></i></div><button id="upGo" type="button" class="primary">Update installieren</button></div>
+    <p id="verTag" class="vertag"></p>
+    <div class="menustack">
+      <div class="ort"><h1>Theos<br>Seitenscheidel</h1><p>Alle Spiele in einem Schrank, allein oder mit bis zu vier Leuten</p></div>
+      <div class="panel menuboard">
+        <button id="bGallery" type="button" class="primary pfeil"><span>Galerie</span></button>
+        <div class="menurow two"><button id="bSettings" type="button">Einstellungen</button><button id="bQuit" type="button">Beenden</button></div>
+      </div>
+    </div>
   </section>
 
-  <section id="rang" class="hd-rang hidden">
-    <div class="sc-karte hd-rangkarte"><h2>Rangliste</h2><div id="hdRangInhalt"></div><div class="sc-knoepfe"><button id="hdRangZu" type="button" class="primary">Zurück</button></div></div>
+  <section id="gallery" class="screen hidden">
+    <h2 class="gtitle">Im Schrank</h2>
+    <div class="gitems">
+      <button id="bPlay" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><path d="M100 5 197 173q2 5-4 5H7q-6 0-4-5Z" fill="#f5f6f4"/><path d="M100 22 182 166H18Z" fill="#c5161d" stroke="#c5161d" stroke-width="8" stroke-linejoin="round"/><path d="M100 56 156 152H44Z" fill="#f5f6f4"/><path d="M88 84h24l5 13h3a3 3 0 0 1 3 3v12H77v-12a3 3 0 0 1 3-3h3Z" fill="#17181b"/><path d="M90 88h20l3 9H87Z" fill="#f5f6f4"/><path d="M84 114c-8 9 12 13 2 24M116 114c-8 9 12 13 2 24" fill="none" stroke="#17181b" stroke-width="5" stroke-linecap="round"/></svg></span><span class="gplate"><b>Rennen</b><small>Zehn Strecken, drei Rollen, ein Auto. Vom Morgenwald bis zur Teufelskehre.</small></span></button>
+      <button id="bPark" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="12" y="2" width="176" height="176" rx="16" fill="#f5f6f4"/><rect x="20" y="10" width="160" height="160" rx="10" fill="#0a4f9c"/><text x="100" y="146" text-anchor="middle" font-size="150" font-weight="700" fill="#f5f6f4">P</text></svg></span><span class="gplate"><b>Parken</b><small>50 Level vom Kleinwagen bis zum Jumbo-Jet. Eine Berührung heißt Neustart.</small></span></button>
+      <button id="bMoon" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="81" fill="#ee7a18"/><circle cx="100" cy="90" r="68" fill="#141b33"/><circle cx="100" cy="90" r="44" fill="#dfe0ea"/><circle cx="84" cy="76" r="9" fill="#b4b5c6"/><circle cx="117" cy="103" r="12" fill="#b4b5c6"/><circle cx="114" cy="68" r="5" fill="#b4b5c6"/><circle cx="82" cy="108" r="6" fill="#b4b5c6"/><path d="M66 127 112 81" stroke="#ee7a18" stroke-width="7" stroke-linecap="round"/><path d="M104 73 120 89 131 78 115 62Z" fill="#f5f6f4"/></svg></span><span class="gplate"><b>Moonsweeper 2</b><small>Mond putzen, Staub verkaufen und eine eigene Firma aufbauen.</small></span></button>
+      <button id="bChess" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><path d="M52 4h96l48 86-48 86H52L4 90Z" fill="#f5f6f4"/><path d="M57 13h86l43 77-43 77H57L14 90Z" fill="#00815a"/><path d="M100 90 57 13h86Z" fill="#c5161d"/><path d="M100 90H186l-43 77Z" fill="#17181b"/><path d="M100 90 57 167 14 90Z" fill="#f5f6f4"/><path d="M84 42h32l-5 42 11 22 10 34H68l10-34 11-22Z" fill="#f9bd00" stroke="#17181b" stroke-width="5" stroke-linejoin="round"/><path d="M100 18v20M91 27h18" stroke="#f9bd00" stroke-width="7" stroke-linecap="round"/></svg></span><span class="gplate"><b>Dreierschach</b><small>Schach zu dritt auf dem Sechseck. Mit KI, am selben PC oder online.</small></span></button>
+      <button id="bPong" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="12" y="2" width="176" height="176" rx="14" fill="#f5f6f4"/><rect x="20" y="10" width="160" height="160" rx="8" fill="#141b33"/><rect x="66" y="150" width="68" height="10" rx="5" fill="#ff4d4f"/><rect x="30" y="56" width="10" height="68" rx="5" fill="#3d9bff"/><rect x="66" y="20" width="68" height="10" rx="5" fill="#ffd02e"/><rect x="160" y="56" width="10" height="68" rx="5" fill="#cfd6dc"/><circle cx="112" cy="102" r="11" fill="#f5f6f4"/></svg></span><span class="gplate"><b>Quadrat-Pong</b><small>Drei Spieler, vier Seiten und eine KI, die nie verliert.</small></span></button>
+      <button id="bShips" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#0a4f9c"/><path d="M42 98h116l-14 30H58Z" fill="#d7dde2"/><path d="M84 98V76h34v22M98 76V48" stroke="#d7dde2" stroke-width="9" fill="none"/><path d="M28 136q12-9 24 0t24 0 24 0 24 0 24 0 24 0" fill="none" stroke="#f5f6f4" stroke-width="6" stroke-linecap="round"/></svg></span><span class="gplate"><b>Schiffe versenken</b><small>Drei Flotten, freie Zielwahl und ein geheimes Radar.</small></span></button>
+      <button id="bRaus" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#1f6a4a"/><circle cx="100" cy="46" r="21" fill="#d3262e"/><circle cx="62" cy="118" r="21" fill="#2462d6"/><circle cx="138" cy="118" r="21" fill="#f2b90f"/><rect x="82" y="76" width="36" height="36" rx="8" fill="#fbf8ef"/><circle cx="92" cy="86" r="4" fill="#20242c"/><circle cx="108" cy="102" r="4" fill="#20242c"/><circle cx="100" cy="94" r="4" fill="#20242c"/></svg></span><span class="gplate"><b>Raus mit dir!</b><small>Das klassische Rauswerf-Brettspiel, online für genau drei Spieler.</small></span></button>
+      <button id="bBaron" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="12" y="2" width="176" height="176" rx="12" fill="#f5f6f4"/><rect x="20" y="10" width="160" height="160" rx="6" fill="#d6eadc"/><rect x="20" y="10" width="160" height="22" fill="#d92b2b"/><rect x="158" y="10" width="22" height="160" fill="#1f9a4c"/><rect x="20" y="148" width="160" height="22" fill="#9fd3ee"/><rect x="20" y="10" width="22" height="160" fill="#f08a1c"/><path d="M52 132 132 52l16 16-80 80Z" fill="#d8261f"/><path d="M84 104h32v26H84z" fill="#1d9a4a"/><path d="M80 106l20-18 20 18Z" fill="#1d9a4a"/><path d="M118 72h22v20h-22z" fill="#c8261f"/></svg></span><span class="gplate"><b>Besser als Monopoly (Besser als Bruno Referenz)</b><small>Grundstücke kaufen, Häuser bauen, Miete kassieren. Zu dritt, allein gegen KI oder online.</small></span></button>
+      <button id="bKraft" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#2b1d14"/><rect x="44" y="104" width="24" height="44" rx="3" fill="#8c8378"/><rect x="132" y="104" width="24" height="44" rx="3" fill="#8c8378"/><path d="M38 92h56l6 8 6-8h56v14h-56l-6-6-6 6H38Z" fill="#c9a06a"/><circle cx="100" cy="98" r="34" fill="none" stroke="#3df28a" stroke-width="7"/><circle cx="100" cy="98" r="22" fill="none" stroke="#f2c46a" stroke-width="3"/><path d="M84 30h32l4 16-6 18H86l-6-18Z" fill="#e2b08c" stroke="#141518" stroke-width="4" stroke-linejoin="round"/></svg></span><span class="gplate"><b>Kraftprobe</b><small>Hämmern, Ring treffen, zuschlagen. Zehn Ziele, drei Spieler gleichzeitig.</small></span></button>
+      <button id="bCasino" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#6a0a18"/><g fill="#f5f6f4"><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(0 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(45 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(90 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(135 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(180 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(225 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(270 100 90)"/><rect x="93" y="12" width="14" height="22" rx="3" transform="rotate(315 100 90)"/></g><circle cx="100" cy="90" r="54" fill="#141418" stroke="#f2c14e" stroke-width="5"/><circle cx="100" cy="90" r="45" fill="none" stroke="#f2c14e" stroke-width="1.5" stroke-dasharray="4 5"/><text x="100" y="113" text-anchor="middle" font-size="66" font-weight="900" fill="#f2c14e">T</text></svg></span><span class="gplate"><b>Teo's Casino</b><small>Weil er reich ist. Lose, Automaten, Karten. Bis zu vier Spieler.</small></span></button>
+      <button id="bStrom" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#14202e"/><rect x="40" y="96" width="120" height="50" rx="4" fill="#5d6b5a"/><path d="M40 96l60-26 60 26z" fill="#4a4e50"/><rect x="88" y="116" width="24" height="30" fill="#2a3036"/><path d="M108 24l-34 58h24l-12 50 40-66h-25l15-42z" fill="#ffd21a" stroke="#14202e" stroke-width="4" stroke-linejoin="round"/></svg></span><span class="gplate"><b>Strom aus wegen Brunos Geschirr&shy;spüler</b><small>Illegal Strom machen: kurbeln, verkaufen, Aufträge, Level. Bis zu vier Spieler.</small></span></button>
+      <button id="bBruno" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#070b1c"/><circle cx="52" cy="40" r="2" fill="#fff"/><circle cx="150" cy="58" r="1.6" fill="#fff"/><circle cx="70" cy="150" r="1.4" fill="#fff"/><circle cx="140" cy="132" r="22" fill="#2a64c8"/><path d="M128 124c6-6 16-4 18 2-4 4-8 8-16 6z" fill="#4fa04a"/><path d="M58 62c14-20 52-22 66-6 14 14 12 44-4 56-16 12-46 12-60-2-12-12-14-32-2-48z" fill="#8f8577" stroke="#1a1410" stroke-width="4"/><circle cx="76" cy="78" r="8" fill="#6e6458"/><circle cx="104" cy="96" r="6" fill="#6e6458"/><path d="M98 66l6 8-6 8-6-8z" fill="#6ec8ff"/><path d="M128 40l6 4-2 7-7-1z" fill="#ffc83a"/></svg></span><span class="gplate"><b>Big Bruno kommt auf die Erde</b><small>Ein Asteroid trifft in 90 Tagen ein. Baut ihn ab! Bis zu vier Spieler.</small></span></button>
+      <button id="bSaege" type="button" class="gitem sg-tile" aria-label="Hund"><span class="gface"><img src="art/hund.jpg" alt=""></span></button>
+      <button id="bOzean" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#0a4f9c"/><circle cx="148" cy="44" r="14" fill="#f9bd00"/><path d="M28 118q12-10 24 0t24 0 24 0 24 0 24 0 24 0" fill="none" stroke="#f5f6f4" stroke-width="7" stroke-linecap="round"/><path d="M36 140q12-10 24 0t24 0 24 0 24 0 24 0" fill="none" stroke="#8fd0ff" stroke-width="6" stroke-linecap="round"/><path d="M76 40h48l-7 70a6 6 0 0 1-6 5H89a6 6 0 0 1-6-5Z" fill="#8fd0ff" fill-opacity=".35" stroke="#f5f6f4" stroke-width="6" stroke-linejoin="round"/><path d="M82 78h36l-3 31a4 4 0 0 1-4 4H89a4 4 0 0 1-4-4Z" fill="#2a86d8"/><rect x="104" y="20" width="9" height="62" rx="4" fill="#f9bd00" transform="rotate(14 108 50)"/></svg></span><span class="gplate"><b>Trockne den Ozean aus</b><small>Theos Handy liegt im Pazifik. Mit einem Glas fängt es an. Allein oder bis zu viert.</small></span></button>
+      <button id="bLudwig" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#1b2340"/><rect x="54" y="30" width="92" height="76" rx="3" fill="#0c1630" stroke="#f5f6f4" stroke-width="6"/><path d="M100 30v76" stroke="#f5f6f4" stroke-width="5"/><circle cx="127" cy="50" r="8" fill="#eef0f8"/><circle cx="70" cy="46" r="1.6" fill="#fff"/><circle cx="86" cy="62" r="1.2" fill="#fff"/><path d="M26 124h148v10a4 4 0 0 1-4 4H30a4 4 0 0 1-4-4Z" fill="#c9a476"/><rect x="58" y="110" width="70" height="11" rx="2" fill="#f7f5f0" transform="rotate(-8 93 115)"/><rect x="58" y="110" width="6" height="11" fill="#7a4a22" transform="rotate(-8 93 115)"/><circle cx="130" cy="111" r="6" fill="#ff7a2a"/><circle cx="130" cy="111" r="3" fill="#ffd36a"/><path d="M133 102c-7-9 7-13 0-22s6-12 0-20" fill="none" stroke="#cfd6dc" stroke-width="4" stroke-linecap="round" opacity=".75"/></svg></span><span class="gplate"><b>Ludwig Zigaretti</b><small>Strenge Eltern, Zockverbot. Also dreht Ludwig heimlich Kippen.</small></span></button>
+      <button id="bRV" type="button" class="gitem"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><circle cx="100" cy="90" r="88" fill="#f5f6f4"/><circle cx="100" cy="90" r="80" fill="#d9682b"/><path d="M29.6 128H170.4A80 80 0 0 1 29.6 128Z" fill="#2b2d33"/><text x="100" y="56" text-anchor="middle" font-size="46" font-weight="900" fill="#f5f6f4">?</text><path d="M46 118V75a9 9 0 0 1 9-9H118L150 92a8 8 0 0 1 4 7V118Z" fill="#f5f6f4"/><rect x="46" y="98" width="106" height="7" fill="#c5161d"/><rect x="58" y="76" width="22" height="16" rx="3" fill="#17181b"/><rect x="88" y="76" width="22" height="16" rx="3" fill="#17181b"/><path d="M122 74 142 92H122Z" fill="#17181b"/><circle cx="76" cy="120" r="11" fill="#17181b"/><circle cx="76" cy="120" r="5" fill="#f5f6f4"/><circle cx="130" cy="120" r="11" fill="#17181b"/><circle cx="130" cy="120" r="5" fill="#f5f6f4"/></svg></span><span class="gplate"><b>Cooles Game</b></span></button>
+      <button id="bStapel" type="button" class="gitem schul-only"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="40" y="128" width="120" height="26" rx="4" fill="#46a8e0"/><rect x="48" y="100" width="110" height="26" rx="4" fill="#46c8d0"/><rect x="48" y="72" width="100" height="26" rx="4" fill="#46e0b0"/><rect x="70" y="44" width="100" height="26" rx="4" fill="#7ed957"/></svg></span><span class="gplate"><b>Stapelturm</b><small>Klick im richtigen Moment und bau den Turm so hoch es geht.</small></span></button>
+      <button id="bDino" type="button" class="gitem schul-only"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="0" y="140" width="200" height="40" fill="#8a8f99"/><ellipse cx="96" cy="104" rx="40" ry="30" fill="#5fbf4a"/><ellipse cx="132" cy="66" rx="26" ry="20" fill="#5fbf4a"/><circle cx="138" cy="60" r="7" fill="#fff"/><circle cx="141" cy="60" r="3.5" fill="#15151a"/><rect x="56" y="78" width="30" height="38" rx="6" fill="#d8342c"/><rect x="84" y="126" width="12" height="20" rx="4" fill="#3e8f34"/><rect x="104" y="126" width="12" height="20" rx="4" fill="#5fbf4a"/><path d="M58 104Q30 100 14 120Q40 118 60 116Z" fill="#5fbf4a"/></svg></span><span class="gplate"><b>Dino-Lauf</b><small>Spring über Ranzen und Mülleimer, duck dich unter Papierfliegern.</small></span></button>
+      <button id="bRang" type="button" class="gitem schul-only"><span class="gface"><svg viewBox="0 0 200 180" aria-hidden="true"><rect x="70" y="70" width="60" height="90" fill="#f3efe6"/><rect x="10" y="100" width="60" height="60" fill="#e4e0d6"/><rect x="130" y="118" width="60" height="42" fill="#d8d2c6"/><text x="100" y="120" text-anchor="middle" font-size="40" font-weight="900" fill="#e0a92a">1</text><text x="40" y="140" text-anchor="middle" font-size="32" font-weight="900" fill="#9aa4b2">2</text><text x="160" y="150" text-anchor="middle" font-size="28" font-weight="900" fill="#b8743a">3</text></svg></span><span class="gplate"><b>Rangliste</b><small>Wer ist besser: Theo, Ludi oder Bruno?</small></span></button>
+    </div>
+    <div class="cornerback"><button id="gBack" type="button"><kbd>Esc</kbd>Zurück</button></div>
+  </section>
+
+  <section id="lobby" class="screen hidden">
+    <div class="panel wide">
+      <h2>Rennen</h2>
+      <p class="sub">Wähle deine Rolle. Den Rest übernimmt die KI.</p>
+      <div class="cards" id="roleCards">
+        <button type="button" class="card" data-role="driver"><b>Fahrer</b><small>Lenkt, gibt Gas und driftet</small></button>
+        <button type="button" class="card" data-role="navigator"><b>Navigator</b><small>Liest die Kurven vom Tablet und kurbelt die Scheibe frei</small></button>
+        <button type="button" class="card" data-role="engineer"><b>Ingenieur</b><small>Repariert hinten in der Werkstatt und zündet Nitro</small></button>
+      </div>
+      <p id="lobbyNote" class="note"></p>
+      <div class="foot"><button id="lBack" type="button"><kbd>Esc</kbd>Zurück</button><span class="st-grow"></span><button id="lMp" type="button">Mehrspieler</button><button id="bStart" type="button" class="primary">Zur Karte</button></div>
+    </div>
+  </section>
+
+  <!-- Startbildschirm je Spiel (seit 2026-11-21, nach Ludwigs Startkarte): Titel, Text und Bild kommen von der Galerie-Kachel -->
+  <section id="start" class="screen hidden">
+    <div class="st-card">
+      <div id="stArt" class="st-art" aria-hidden="true"></div>
+      <p class="label">Theos Seitenscheidel</p><h2 id="stTitle"></h2>
+      <p id="stLead" class="cs-lead"></p>
+      <ol id="stRules" class="st-rules hidden"></ol>
+      <div class="foot"><button id="stBack" type="button"><kbd>Esc</kbd>Zurück</button><span class="st-grow"></span><button id="stSettings" type="button">Einstellungen</button><button id="stRulesBtn" type="button" class="hidden">Regeln</button><button id="stMulti" type="button">Mehrspieler</button><button id="stSingle" type="button" class="primary">Einzelspieler</button></div>
+    </div>
+  </section>
+  <!-- Große Startbildschirme (seit 2026-11-22): Ludwig, Strom, Ozean, Big Bruno; Szene und Texte kommen aus titel.js -->
+  <div id="ttCover" class="tt-cover hidden" aria-hidden="true"></div>
+  <section id="titel" class="screen titel hidden">
+    <div class="tt-col">
+      <h2 id="ttLogo" class="tt-logo"></h2>
+      <p id="ttSlogan" class="tt-slogan"></p>
+      <div id="ttMain" class="tt-list">
+        <button id="ttPlay" type="button" class="tt-btn primary"><b>Weiterspielen</b><small id="ttPlayInfo"></small></button>
+        <button id="ttNew" type="button" class="tt-btn"><b>Neuer Spielstand</b></button>
+        <button id="ttSaves" type="button" class="tt-btn"><b>Spielstände</b></button>
+        <button id="ttMulti" type="button" class="tt-btn"><b>Mehrspieler</b></button>
+        <button id="ttSettings" type="button" class="tt-btn"><b>Einstellungen</b></button>
+        <button id="ttBack" type="button" class="tt-btn"><b>Zurück</b></button>
+      </div>
+      <div id="ttNewBox" class="tt-box hidden">
+        <label for="ttName">Name des Spielstands</label>
+        <input id="ttName" type="text" maxlength="32" autocomplete="off" spellcheck="false">
+        <div class="tt-row"><button id="ttNewBack" type="button" class="tt-mini">Abbrechen</button><button id="ttNewGo" type="button" class="tt-mini primary">Spiel starten</button></div>
+      </div>
+      <div id="ttSavesBox" class="tt-box hidden">
+        <p class="tt-boxh">Spielstände</p>
+        <div id="ttSaveList" class="tt-savelist"></div>
+        <div class="tt-row"><button id="ttSavesBack" type="button" class="tt-mini">Zurück</button></div>
+      </div>
+    </div>
+    <div id="ttGeburtstag" class="lw-hud"></div>
+  </section>
+  <section id="join" class="screen hidden">
+    <div class="panel wide">
+      <h2 id="mpTitle">Mehrspieler</h2>
+      <div id="mpEntry">
+        <p class="sub">Zusammen spielen, ohne Konto, ohne Router-Einstellungen und ohne Code: Einer erstellt eine Lobby, die anderen sehen sie unter „Offene Lobbys“ und treten per Klick bei.</p>
+        <label class="label" for="mpName">Dein Name</label><input id="mpName" class="mpinput" maxlength="16" value="Spieler" autocomplete="off">
+        <div class="mpcols">
+          <div class="mpbox"><h3>Lobby erstellen</h3><p class="note">Deine Lobby ist öffentlich: Alle, die das Spiel offen haben, sehen sie und können beitreten.</p><button id="mpHost" type="button" class="primary">Lobby erstellen</button></div>
+          <div class="mpbox"><h3>Offene Lobbys</h3><div id="mpOpen" class="mpopen"><p class="note">Noch nicht gesucht.</p></div><button id="mpScan" type="button">Aktualisieren</button></div>
+        </div>
+        <details class="mpcodejoin"><summary>Mit Code beitreten (Notlösung)</summary><label class="note" for="mpCode">Code vom Host eingeben</label><input id="mpCode" class="mpinput" maxlength="14" placeholder="BRUNO-4821" autocomplete="off"><button id="mpJoin" type="button" class="primary">Beitreten</button></details>
+      </div>
+      <div id="mpRoom" class="hidden">
+        <div class="mpcodebar"><div><p id="mpCodeLabel" class="label">Code für deine Freunde</p><p id="mpCodeShow" class="code">BRUNO-0000</p></div><button id="mpCopy" type="button">Code kopieren</button></div>
+        <div id="mpModeRow" class="mprow hidden"><p class="label">Was spielt ihr?</p><div class="seg"><button type="button" id="mpModeRace">Rennen</button><button type="button" id="mpModePark">Parken</button><button type="button" id="mpModeMoon">Moonsweeper 2</button><button type="button" id="mpModeChess">Dreierschach</button><button type="button" id="mpModePong">Quadrat-Pong</button><button type="button" id="mpModeShips">Schiffe versenken</button><button type="button" id="mpModeRaus">Raus mit dir!</button><button type="button" id="mpModeBaron">Besser als Monopoly (Besser als Bruno Referenz)</button><button type="button" id="mpModeSaege" class="mp-dog" aria-label="Hund"><img src="art/hund.jpg" alt=""></button><button type="button" id="mpModeKraft">Kraftprobe</button><button type="button" id="mpModeCasino">Teo's Casino</button><button type="button" id="mpModeStrom">Strom aus wegen Brunos Geschirrspüler</button><button type="button" id="mpModeBruno">Big Bruno kommt auf die Erde</button><button type="button" id="mpModeOzean">Trockne den Ozean aus</button></div></div>
+        <div id="mpChessRow" class="mprow hidden"><p class="label">Spielende</p><div class="seg"><button type="button" data-end="1">Erstes Matt</button><button type="button" data-end="2">Figuren erben</button><button type="button" data-end="3">Bis zum Letzten</button></div></div>
+        <p id="mpLobbyInfo" class="note"></p>
+        <div id="mpCaSlot" class="mpcaslot hidden"><label for="mpCaSel">Spielstand</label><select id="mpCaSel"></select><button id="mpCaNew" type="button">Neu</button><button id="mpCaRen" type="button">Umbenennen</button><button id="mpCaDel" type="button">Löschen</button><input id="mpCaName" class="hidden" type="text" maxlength="32"><button id="mpCaOk" type="button" class="primary hidden">OK</button><button id="mpCaCancel" type="button" class="hidden">Abbrechen</button></div>
+        <p class="label">Spieler: <span id="mpCount">1</span> von <span id="mpMax">3</span></p>
+        <div id="mpSlots" class="mpslots"></div>
+        <div id="mpRang" class="mprang hidden"><p class="label">Rangliste: wer hat die meisten Pokale?</p><ol id="mpRangListe"></ol></div>
+        <div class="foot"><button id="mpLeave" type="button">Lobby verlassen</button><button id="mpStart" type="button" class="primary">Spiel starten</button></div>
+      </div>
+      <p id="mpStatus" class="mpstatus">Nicht verbunden</p>
+      <div class="foot"><button id="jBack" type="button"><kbd>Esc</kbd>Zurück</button></div>
+    </div>
+  </section>
+
+  <section id="settings" class="screen hidden">
+    <div class="panel wide">
+      <h2>Einstellungen</h2>
+      <div class="tabs"><button type="button" class="tab sel" data-tab="gfx">Grafik</button><button type="button" class="tab" data-tab="keys">Steuerung</button><button type="button" class="tab" data-tab="game">Spiel</button><button type="button" class="tab" data-tab="snd">Ton</button><button type="button" class="tab" data-tab="stand">Spielstände</button></div>
+      <div class="tabpane" data-tab="gfx">
+        <div class="opt"><div><b>Bildqualität</b><small>Ultra zeigt alle Effekte. Niedrig läuft auch auf schwachen Grafikkarten.</small></div><div class="seg" id="segQuality"><button type="button" data-v="low">Niedrig</button><button type="button" data-v="high">Hoch</button><button type="button" data-v="ultra">Ultra</button></div></div>
+        <div class="opt"><div><b>Schatten</b><small>Ohne Schatten läuft das Spiel flüssiger.</small></div><div class="seg" id="segShadow"><button type="button" data-v="off">Aus</button><button type="button" data-v="on">An</button></div></div>
+      </div>
+      <div class="tabpane hidden" data-tab="keys">
+        <p class="note">Auf eine Taste klicken, dann die neue Taste drücken. <kbd>Esc</kbd> bricht ab. Fest belegt: <kbd>T</kbd> <kbd>G</kbd> <kbd>H</kbd> Radio, <kbd>B</kbd> <kbd>V</kbd> Lautstärke, <kbd>M</kbd> Ton aus, <kbd>F11</kbd> Vollbild (überall; Esc beendet es nicht, beim nächsten Start ist es wieder an).</p>
+        <div id="bindList" class="binds"></div>
+        <div class="foot end"><button id="bindReset" type="button">Alle Tasten zurücksetzen</button></div>
+      </div>
+      <div class="tabpane hidden" data-tab="game">
+        <div class="opt"><div><b>Schäden im Rennen</b><small>Jeder Schaden muss in 60 Sekunden repariert sein, sonst beginnt das Rennen von vorn.</small></div><div class="seg" id="segDamage"><button type="button" data-v="aus">Aus</button><button type="button" data-v="selten">Selten</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="viel">Viele</button></div></div>
+        <div class="opt"><div><b>KI-Ingenieur</b><small>Repariert, wenn niemand in der Werkstatt ist. Bei Aus machst du alles selbst.</small></div><div class="seg" id="segEngAI"><button type="button" data-v="off">Aus</button><button type="button" data-v="slow">Langsam</button></div></div>
+        <div class="opt"><div><b>Was ist neu?</b><small>Die Neuerungen der letzten Updates, wie auf dem Zettel an der Schranktür.</small></div><button id="sNeu" type="button">Ansehen</button></div>
+      </div>
+      <div class="tabpane hidden" data-tab="snd">
+        <div class="slider"><label for="volMaster">Gesamtlautstärke</label><input id="volMaster" type="range" min="0" max="100" step="5" value="80"><span id="volMasterV">80 %</span></div>
+        <div class="slider"><label for="volRadio">Radio</label><input id="volRadio" type="range" min="0" max="100" step="5" value="60"><span id="volRadioV">60 %</span></div>
+        <div class="mixhead"><div><b>Sound-Mischpult</b><small>Jedes Geräusch jedes Spiels hat einen eigenen Regler (0 bis 150 %). Änderungen hört man sofort.</small></div><button id="mixReset" type="button">Alle auf 100 %</button></div>
+        <div id="mixList" class="mixlist"></div>
+      </div>
+      <div class="tabpane hidden" data-tab="stand">
+        <p id="standHinweis" class="note"></p>
+        <div id="standListe" class="standliste"></div>
+        <div id="standFrage" class="standfrage hidden" role="alert"><p id="standFrageText"></p><div class="foot"><button id="standNein" type="button">Abbrechen</button><button id="standJa" type="button" class="primary">Ja, zurückholen</button></div></div>
+      </div>
+      <div class="foot"><button id="sBack" type="button"><kbd>Esc</kbd>Zurück</button></div>
+    </div>
+  </section>
+
+  <section id="roadmap" class="rmap hidden">
+    <canvas id="rmCv"></canvas>
+    <div class="rmtop"><h2>Die große Rallye</h2><p id="rmSub"></p></div>
+    <div class="rmboard" id="rmBoard"></div>
+    <div class="rmcard" id="rmCard"><small id="rmNum"></small><h3 id="rmName"></h3><p id="rmBlurb"></p><p id="rmStat" class="rmstat"></p><button id="rmGo" type="button" class="primary">Strecke starten</button></div>
+    <div class="rmbtns"><button id="rmBack" type="button">Zurück</button></div>
   </section>
 
   <section id="chess" class="cs hidden">
@@ -66,6 +231,7 @@
     <div id="csPromo" class="cs-over hidden"><div class="cs-card cs-promo"><h2>Bauer umwandeln</h2><div id="csPromoBtns"></div></div></div>
     <div id="csResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="csResTitle"></h2><p id="csResText"></p><div class="foot"><button id="csResBack" type="button">Verlassen</button><button id="csAgain" type="button" class="primary">Nochmal</button></div></div></div>
   </section>
+
   <section id="pong" class="cs pg-theme hidden">
     <div class="cs-table">
       <div class="cs-boardwrap"><canvas id="pgBoard"></canvas></div>
@@ -87,6 +253,7 @@
     
     <div id="pgResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="pgResTitle"></h2><p id="pgResText"></p><div class="foot"><button id="pgResBack" type="button">Verlassen</button><button id="pgAgain" type="button" class="primary">Nochmal</button></div></div></div>
   </section>
+
   <section id="ships" class="cs sh-theme hidden">
     <div class="cs-table">
       <div class="sh-main"><div id="shPlaceWrap" class="sh-place hidden"><div class="sh-sea"><canvas id="shPlace"></canvas></div></div><div id="shBattle" class="sh-battle"><div class="sh-col"><p id="shNameA" class="sh-name"></p><div class="sh-sea"><canvas id="shA"></canvas></div></div><div class="sh-col"><p id="shNameB" class="sh-name"></p><div class="sh-sea"><canvas id="shB"></canvas></div></div></div></div>
@@ -108,6 +275,431 @@
     <div id="shCover" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Nicht spicken</p><h2 id="shCoverT"></h2><div class="foot"><button id="shCoverGo" type="button" class="primary">Ich bin dran</button></div></div></div>
     <div id="shResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="shResTitle"></h2><p id="shResText"></p><div class="foot"><button id="shResBack" type="button">Verlassen</button><button id="shAgain" type="button" class="primary">Nochmal</button></div></div></div>
   </section>
+
+  <section id="raus" class="cs rs-theme hidden">
+    <div class="cs-table">
+      <div class="cs-boardwrap"><canvas id="rsBoard"></canvas></div>
+      <aside class="cs-side">
+        <div class="cs-head"><h2>Raus mit dir!</h2></div>
+        <div id="rsStatus" class="cs-status"></div>
+        <div id="rsSeats" class="cs-seats"></div>
+        <div class="rs-diebox"><div><small>Gewürfelt</small><b id="rsDie">–</b></div><button id="rsRoll" type="button" class="primary">Würfeln <kbd>Leertaste</kbd></button></div>
+        <p id="rsNote" class="cs-note"></p>
+        <div class="cs-actions"><button id="rsHelp" type="button">Regeln</button><button id="rsBack" type="button">Verlassen</button></div>
+      </aside>
+    </div>
+    <div id="rsGate" class="cs-over hidden"><div class="cs-card"><h2>Raus mit dir!</h2><p class="cs-lead">Dieses Brettspiel gibt es nur online für genau drei Spieler: Rot, Blau und Gelb. Es spielt keine KI mit.</p><p class="cs-mphint">Im Startbildschirm auf „Mehrspieler“: Einer erstellt eine Lobby, die anderen sehen sie in der Liste und treten ohne Code bei.</p><div class="foot"><button id="rsGateBack" type="button"><kbd>Esc</kbd>Zurück</button></div></div></div>
+    <div id="rsResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="rsResTitle"></h2><p id="rsResText"></p><div class="foot"><button id="rsResBack" type="button">Verlassen</button><button id="rsAgain" type="button" class="primary">Neue Runde</button></div></div></div>
+  </section>
+
+  <section id="baron" class="cs bn-theme hidden">
+    <div class="cs-table bn-table">
+      <div class="cs-boardwrap"><canvas id="bnBoard"></canvas><div id="bnPops" class="bn-pops"></div></div>
+      <aside class="cs-side bn-side">
+        <div class="cs-head"><h2>Besser als Monopoly (Besser als Bruno Referenz)</h2><p id="bnBank"></p></div>
+        <div id="bnStatus" class="cs-status"></div>
+        <div id="bnSeats" class="cs-seats"></div>
+        <div class="bn-dicebox"><div><small>Gewürfelt</small><b id="bnDice">–</b></div><div id="bnActs" class="bn-acts"></div></div>
+        <div id="bnInfo" class="bn-info"></div>
+        <p id="bnNote" class="cs-note"></p>
+        <div class="cs-actions bn-bar"><button id="bnTrade" type="button">Handeln</button><button id="bnTurnB" type="button">Drehen</button><button id="bnHelp" type="button">Regeln</button><button id="bnBack" type="button">Verlassen</button></div>
+      </aside>
+    </div>
+    <div id="bnCardShow" class="bn-cardshow hidden"><div class="bn-cardface"><small id="bnCardWho"></small><h3 id="bnCardDeck"></h3><p id="bnCardText"></p></div></div>
+    <div id="bnPick" class="cs-over hidden"><div class="cs-card"><p class="label">Charakterauswahl</p><h2>Wähle deine Figur</h2><div id="bnTokens" class="bn-tokens"></div><p id="bnPickInfo" class="cs-mphint"></p></div></div>
+    <div id="bnTradeBox" class="cs-over hidden"><div class="cs-card bn-tradecard"><p class="label">Handel vorschlagen</p><h2>Mit wem handelst du?</h2><div id="bnTrWho" class="bn-trwho"></div><p class="cs-mphint">Grundstücke mit Häusern in der Farbe kann man nicht tauschen. Belastete Grundstücke bleiben belastet.</p><div class="bn-trcols"><div id="bnTrGive"></div><div id="bnTrGet"></div></div><p id="bnTrErr" class="bn-err"></p><div class="foot"><button id="bnTrCancel" type="button"><kbd>Esc</kbd>Abbrechen</button><button id="bnTrSend" type="button" class="primary">Anbieten</button></div></div></div>
+    <div id="bnOfferBox" class="cs-over hidden"><div class="cs-card bn-tradecard"><p class="label">Handel</p><h2 id="bnOfferTitle"></h2><div id="bnOfferBody" class="bn-trcols"></div><div class="foot"><button id="bnOfferNo" type="button">Ablehnen</button><button id="bnOfferYes" type="button" class="primary">Annehmen</button></div></div></div>
+    <div id="bnGate" class="cs-over hidden"><div class="cs-card"><h2>Besser als Monopoly (Besser als Bruno Referenz)</h2><p class="cs-lead">Kaufen, bauen, kassieren: Wer am Ende als Einziger nicht pleite ist, gewinnt. Gespielt wird zu dritt, freie Plätze übernimmt die KI.</p><div class="bn-gatebtns"><button id="bnSolo" type="button" class="primary">Allein gegen zwei KI</button><button id="bnSoloGo" type="button" class="hidden">Letzte Partie weiterspielen</button><button id="bnMp" type="button">Mehrspieler</button></div><p class="cs-mphint">Online mit Freunden: „Mehrspieler“. Offene Lobbys stehen dort in einer Liste, ohne Code.</p><div class="foot"><button id="bnGateBack" type="button"><kbd>Esc</kbd>Zurück</button></div></div></div>
+    <div id="bnResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="bnResTitle"></h2><p id="bnResText"></p><div class="foot"><button id="bnResBack" type="button">Verlassen</button><button id="bnAgain" type="button" class="primary">Neue Partie</button></div></div></div>
+  </section>
+
+  <section id="parkmap" class="rmap hidden">
+    <canvas id="pmCv"></canvas>
+    <div class="rmtop pmtop"><h2>Parkstadt</h2><p id="pmSub"></p></div>
+    <div class="rmboard" id="pmBoard"></div>
+    <div class="rmcard" id="pmCard"><small id="pmNum"></small><h3 id="pmName"></h3><p id="pmBlurb"></p><p id="pmVeh" class="rmstat"></p><p id="pmStat" class="rmstat"></p><button id="pmGo" type="button" class="primary">Level starten</button></div>
+    <div class="rmbtns"><button id="pmBack" type="button">Zurück</button><button id="pmMp" type="button">Mehrspieler</button></div>
+  </section>
+
+  <section id="pkResult" class="screen hidden">
+    <div class="panel result">
+      <h2 id="prTitle">Perfekt geparkt!</h2>
+      <p class="sub" id="prSub"></p>
+      <p class="pkstars" id="prStars"></p>
+      <p class="time" id="prTime"></p>
+      <p class="note" id="prInfo"></p>
+      <p class="note hidden" id="prWait">Der Host wählt, wie es weitergeht.</p>
+      <div class="foot"><button id="prMap" type="button">Zur Karte</button><button id="prAgain" type="button">Nochmal</button><button id="prNext" type="button" class="primary">Nächstes Level</button></div>
+    </div>
+  </section>
+
+  <section id="loading" class="screen hidden"><div class="panel loadboard"><h2>Strecke wird gebaut</h2><p class="sub" id="loadSub">Wald pflanzen, Asphalt legen, Schlamm anrühren.</p><div class="bake"></div></div></section>
+
+  <section id="pause" class="screen hidden">
+    <div class="pausestack">
+      <div class="stop"><span>Pause</span></div>
+      <div class="panel pauseboard">
+        <button id="pResume" type="button" class="primary">Weiterspielen</button>
+        <button id="pRestart" type="button">Neu starten</button>
+        <button id="pSettings" type="button">Einstellungen</button>
+        <button id="pMenu" type="button">Hauptmenü</button>
+        <button id="pQuit" type="button">Spiel beenden</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen hidden">
+    <div class="panel result" id="rPanel">
+      <h2 id="rTitle">DU HAST VERKACKT</h2>
+      <p id="rSub" class="sub"></p>
+      <p id="rTime" class="time"></p>
+      <div class="foot">
+        <button id="rMenu" type="button">Hauptmenü</button>
+        <button id="rMap" type="button">Zur Karte</button>
+        <button id="rAgain" type="button" class="hidden">Weiterfahren</button>
+        <button id="rRestart" type="button" class="primary"><kbd>Enter</kbd>Nochmal fahren</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="kraft" class="kr-hud hidden">
+    <div class="kr-top"><span id="krTarget"></span><b id="krName"></b></div>
+    <div id="krTime" class="kr-time"></div>
+    <div id="krSeats" class="kr-seats"></div>
+    <ol id="krTower" class="kr-tower"></ol>
+    <div id="krPower" class="kr-power hidden"><i></i></div>
+    <div id="krBig" class="kr-big"></div>
+    <p id="krHint" class="kr-hint"></p>
+    <div class="kr-actions"><button id="krHelp" type="button">Regeln</button><button id="krBack" type="button"><span id="krBackT">Verlassen</span></button></div>
+    <div id="krIntro" class="kr-intro hidden"><p id="krIntroN" class="label"></p><h2 id="krIntroT"></h2><p id="krIntroB"></p></div>
+    <div id="krSetup" class="cs-over hidden"><div class="cs-card">
+      <h2>Kraftprobe</h2><p class="cs-lead">Hämmere, bis der Kraftring genau auf dem Zielkreis liegt, und schlag dann zu. Zehn Ziele, von Fichtenlatten bis Mondgestein.</p>
+      <p class="label">Wer spielt?</p><div class="cards cs-two" id="krWho"><button type="button" class="card" data-who="bots"><b>Gegen die KI</b><small>Du spielst Rot, zwei KI-Gegner</small></button><button type="button" class="card" data-who="local"><b>Zu dritt am PC</b><small>Rot A und W, Blau J und I, Gelb Pfeile</small></button></div>
+      <p class="cs-mphint">Online zu dritt: im Startbildschirm auf „Mehrspieler“.</p>
+      <div class="foot"><button id="krSetupBack" type="button"><kbd>Esc</kbd>Zurück</button><button id="krRules" type="button">Regeln ansehen</button><button id="krGo" type="button" class="primary">Los geht's</button></div>
+    </div></div>
+    <div id="krResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Kraftprobe beendet</p><h2 id="krResTitle"></h2><ol id="krResList" class="kr-reslist"></ol><p id="krResText"></p><div class="foot"><button id="krResBack" type="button">Verlassen</button><button id="krAgain" type="button" class="primary">Nochmal</button></div></div></div>
+    <div id="krPause" class="cs-over hidden"><div class="cs-card cs-resultcard"><h2>Pause</h2><p>Online läuft die Runde weiter.</p><div class="foot"><button id="krQuit" type="button">Verlassen</button><button id="krResume" type="button" class="primary">Weiter</button></div></div></div>
+  </div>
+  <div id="saege" class="sg-hud hidden">
+    <canvas id="sgBlood" class="sg-blood"></canvas>
+    <div id="sgHurt" class="sg-hurt"></div>
+    <div class="sg-top"><span id="sgWave"></span><b id="sgCount"></b></div>
+    <div class="sg-weap"><b id="sgWeap"></b><small id="sgAmmo"></small></div>
+    <div id="sgPlayers" class="sg-players"></div>
+    <div id="sgOut" class="sg-out hidden"><b>Du bist raus</b><small>Die anderen kämpfen weiter. Schaffen sie die Welle, bist du wieder dabei.</small></div>
+    <div class="sg-hp"><i id="sgHpF"></i></div>
+    <div class="sg-cross"></div>
+    <div id="sgBig" class="sg-big"></div>
+    <p id="sgHint" class="sg-hint">Klick ins Bild zum Steuern</p>
+    <div id="sgStart" class="cs-over hidden"><div class="cs-card sg-card">
+      <img src="art/hund.jpg" class="sg-dog" alt="">
+      <ul class="sg-keys"><li><kbd>Maus</kbd>umsehen</li><li><kbd>W A S D</kbd>laufen, <kbd>Shift</kbd> rennen</li><li><kbd>Linke Maus</kbd>sägen, häckseln, schießen</li><li><kbd>Esc</kbd>Pause</li></ul>
+      <p class="cs-lead">Das Tor geht auf, ein LKW lädt Hamster ab. Welle 1: 100, Welle 2: 200, Welle 3: 300 und immer so weiter, bis sie dich erwischen. Jede Welle eine andere Waffe: Kettensäge, Sägeblatt-Werfer, Minigun, Schrotflinte, Häcksler, Granatwerfer. Zu viert online: unten auf „Mehrspieler“.</p>
+      <p id="sgBest"></p>
+      <div class="foot"><button id="sgBack" type="button"><kbd>Esc</kbd>Zurück</button><span class="st-grow"></span><button id="sgMp" type="button">Mehrspieler</button><button id="sgGo" type="button" class="primary">Los</button></div>
+    </div></div>
+    <div id="sgPause" class="cs-over hidden"><div class="cs-card cs-resultcard"><h2>Pause</h2><p id="sgPauseNet" class="hidden">Online läuft die Welle weiter.</p><div class="foot"><button id="sgQuit" type="button">Verlassen</button><button id="sgResume" type="button" class="primary">Weiter</button></div></div></div>
+    <div id="sgEnd" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Die Hamster haben gewonnen</p><h2 id="sgEndTitle"></h2><ol id="sgEndList" class="kr-reslist"></ol><p id="sgEndText"></p><p id="sgEndWait" class="hidden">Der Host kann eine neue Runde starten.</p><div class="foot"><button id="sgEndBack" type="button">Verlassen</button><button id="sgEndAgain" type="button" class="primary">Nochmal von vorn</button></div></div></div>
+  </div>
+  <div id="ludwig" class="lw-hud hidden">
+    <div class="lw-top lw-char">
+      <div id="lwSegZeit" class="lw-seg lw-zeit"><span id="lwZeitI" class="lw-zeiti">🌙</span><div><b id="lwZeit" class="lw-num">18:00</b><small id="lwZeitP">Abend</small></div></div>
+      <div id="lwSegMoney" class="lw-seg money"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#ffcf5a" stroke="#a8721e" stroke-width="2.5"/><circle cx="16" cy="16" r="9" fill="none" stroke="#e0a83a" stroke-width="1.5"/><text x="16" y="21" text-anchor="middle" font-size="13" font-weight="900" fill="#7a4a0a" font-family="Bahnschrift, sans-serif">€</text></svg><div><b id="lwGeld" class="lw-num">5,00 €</b><small>Kasse</small></div></div>
+      <div id="lwSegBox" class="lw-seg"><svg viewBox="0 0 32 32"><rect x="10" y="3.5" width="3" height="8" fill="#f7f3ea"/><rect x="14.5" y="2.5" width="3" height="9" fill="#f7f3ea"/><rect x="19" y="4.5" width="3" height="7" fill="#f7f3ea"/><rect x="10" y="3.5" width="3" height="1.8" fill="#d88a3a"/><rect x="14.5" y="2.5" width="3" height="1.8" fill="#d88a3a"/><rect x="19" y="4.5" width="3" height="1.8" fill="#d88a3a"/><rect x="7" y="9" width="18" height="20" rx="2" fill="#c7742a" stroke="#3a1e0a" stroke-width="1.5"/><rect x="7" y="9" width="18" height="5" fill="#e9dfca" stroke="#3a1e0a" stroke-width="1"/><circle cx="16" cy="21" r="4" fill="none" stroke="#3a1e0a" stroke-width="1.5"/></svg><div><b id="lwKippen" class="lw-num">0/50</b><small id="lwBoxL">Box</small></div><div class="bar"><i id="lwBoxFill"></i></div></div>
+      <div id="lwSegHand" class="lw-seg"><svg viewBox="0 0 32 32"><rect x="11" y="2" width="2.6" height="11" fill="#f7f3ea" transform="rotate(-12 12 8)"/><rect x="16.5" y="1.5" width="2.6" height="11" fill="#f7f3ea" transform="rotate(9 17 7)"/><path d="M6 8h20v11c0 6-4 9-10 10-6-1-10-4-10-10Z" fill="#2c4a7a" stroke="#14243e" stroke-width="1.5"/><path d="M7 12h18" stroke="#f0c060" stroke-width="1.3" stroke-dasharray="2 2"/></svg><div><b id="lwHand" class="lw-num">0/10</b><small id="lwHandL">Taschen</small></div></div>
+      <div id="lwSegPapier" class="lw-seg"><svg viewBox="0 0 32 32"><rect x="5" y="9" width="22" height="15" rx="1.5" fill="#f3ead8" stroke="#8a6a3a" stroke-width="1.5"/><path d="M5 13h22" stroke="#1c3f86" stroke-width="2.2"/><rect x="9" y="5" width="14" height="6" fill="#fffaf0" stroke="#c8b898"/></svg><div><b id="lwPapier" class="lw-num">10</b><small>Blättchen</small></div></div>
+      <div id="lwSegTabak" class="lw-seg"><svg viewBox="0 0 32 32"><path d="M6 12c0-4 4-6 10-6s10 2 10 6v10c0 4-4 6-10 6S6 26 6 22Z" fill="#1f5a3a" stroke="#0e2a1a" stroke-width="1.5"/><ellipse cx="16" cy="12" rx="8" ry="3" fill="#7a4a22"/><path d="M11 11.5c2 1 4 1 6 0M14 13c2 .5 3 .5 5-.5" stroke="#3a2210" stroke-width="1"/></svg><div><b id="lwTabak" class="lw-num">10</b><small>Tabak</small></div></div>
+      <div id="lwSegMat" class="lw-seg hidden"><span id="lwMatI" class="lw-segemo">🧻</span><div><b id="lwMat" class="lw-num">0</b><small id="lwMatL">Hülsen</small></div></div>
+      <div id="lwSegResp" class="lw-seg resp"><svg viewBox="0 0 32 32"><path d="M16 3l3.9 8 8.8 1.2-6.4 6.1 1.6 8.7L16 22.8 8.1 27l1.6-8.7L3.3 12.2 12.1 11Z" fill="#ffcf5a" stroke="#a8721e" stroke-width="1.6" stroke-linejoin="round"/></svg><div><b id="lwResp" class="lw-num">0</b><small>Respekt</small></div></div>
+      <div id="lwSegSack" class="lw-seg hidden"><svg viewBox="0 0 32 32"><path d="M9 11c0-4 3-7 7-7s7 3 7 7" fill="none" stroke="#5a3a1a" stroke-width="2"/><rect x="6" y="10" width="20" height="19" rx="5" fill="#c0392b" stroke="#6a1a12" stroke-width="1.5"/><rect x="10" y="17" width="12" height="7" rx="2" fill="#a02a1e" stroke="#6a1a12" stroke-width="1.2"/></svg><div><b id="lwSack" class="lw-num">0/4</b><small>Rucksack</small></div></div>
+      <div id="lwSegLager" class="lw-seg hidden"><svg viewBox="0 0 32 32"><rect x="3" y="24" width="26" height="4" fill="#a8804c" stroke="#5a3a1a" stroke-width="1.2"/><rect x="5" y="12" width="10" height="12" fill="#c98f56" stroke="#5a3a1a" stroke-width="1.2"/><rect x="17" y="12" width="10" height="12" fill="#c98f56" stroke="#5a3a1a" stroke-width="1.2"/><rect x="11" y="3" width="10" height="9" fill="#d8a46a" stroke="#5a3a1a" stroke-width="1.2"/></svg><div><b id="lwLager" class="lw-num">0</b><small>Lager</small></div></div>
+    </div>
+    <div id="lwWin" class="lw-win lw-char hidden"><svg class="bell" viewBox="0 0 32 32"><path d="M16 4c5 0 8 4 8 9v6l3 4H5l3-4v-6c0-5 3-9 8-9Z" fill="#ffb347" stroke="#7a3a0a" stroke-width="1.5"/><circle cx="16" cy="27" r="3" fill="#ff7a1a"/></svg><div class="txt"><small>Es klopft am Fenster</small><b id="lwWinT"></b><em id="lwWinN"></em></div><div id="lwFuse" class="lw-fuse"><span class="filter"></span><span class="paper" id="lwFuseP"></span><span class="smoke" id="lwFuseS"></span><span class="ember" id="lwFuseE"></span></div></div>
+    <div id="lwCross" class="lw-cross hidden"></div>
+    <div id="lwPrompt" class="lw-prompt hidden"><span class="lw-char"><i id="lwPEk" class="lw-key">E</i><b id="lwPE"></b></span><span class="lw-char"><i id="lwPFk" class="lw-key">F</i><b id="lwPF"></b></span></div>
+    <div id="lwRoll" class="lw-roll lw-char hidden">
+      <div id="lwRSteps" class="lw-rsteps">
+        <div class="lw-rstep"><div class="ico"><svg class="ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="27"/><circle class="p" cx="31" cy="31" r="27"/></svg><svg class="sym" viewBox="0 0 32 32"><rect x="4" y="10" width="24" height="12" rx="1" fill="#f7f3ea" stroke="#c8b898" stroke-width="1.2"/><path d="M4 13h24" stroke="#e0d4bc"/></svg></div><span>Papier</span></div>
+        <div class="lw-rstep"><div class="ico"><svg class="ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="27"/><circle class="p" cx="31" cy="31" r="27"/></svg><svg class="sym" viewBox="0 0 32 32"><rect x="4" y="16" width="24" height="9" rx="1" fill="#f7f3ea"/><path d="M7 18c4-4 14-4 18 0v3H7Z" fill="#8a5a2a"/><path d="M9 17l2-3M14 15l1-4M19 15l2-3M23 17l1-3" stroke="#7a4a22" stroke-width="1.6" stroke-linecap="round"/></svg></div><span>Tabak</span></div>
+        <div class="lw-rstep"><div class="ico"><svg class="ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="27"/><circle class="p" cx="31" cy="31" r="27"/></svg><svg class="sym" viewBox="0 0 32 32"><rect x="5" y="13" width="22" height="7" rx="3.5" fill="#f7f3ea" stroke="#c8b898"/><path d="M8 8c5-4 11-4 16 0" fill="none" stroke="#ffb347" stroke-width="2" stroke-linecap="round"/><path d="M22 5l2.5 3-3.5 1" fill="none" stroke="#ffb347" stroke-width="2" stroke-linecap="round"/><path d="M24 25c-5 4-11 4-16 0" fill="none" stroke="#ffb347" stroke-width="2" stroke-linecap="round"/></svg></div><span>Drehen</span></div>
+        <div class="lw-rstep"><div class="ico"><svg class="ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="27"/><circle class="p" cx="31" cy="31" r="27"/></svg><svg class="sym" viewBox="0 0 32 32"><rect x="13" y="3" width="6" height="21" rx="1" fill="#f7f3ea" stroke="#c8b898"/><rect x="13" y="3" width="6" height="3" fill="#8a5a2a"/><path d="M6 28h20M8 24l-3-2M24 24l3-2" stroke="#ffb347" stroke-width="2" stroke-linecap="round"/></svg></div><span>Klopfen</span></div>
+      </div>
+      <div class="lw-rbar"><i id="lwRBar"></i></div>
+      <p id="lwHint" class="lw-hint"></p>
+    </div>
+    <div id="lwSorts" class="lw-sorts lw-char hidden"></div>
+    <div id="lwBubble" class="lw-bubble hidden"><b id="lwBName"></b><p id="lwBText"></p></div>
+    <p class="lw-keys-hint"><i class="lw-key">WASD</i> laufen · <i class="lw-key">E</i> benutzen · <i class="lw-key">T</i> Handy · <i class="lw-key">K</i> Kiosk · <i class="lw-key">R</i> Rauchen · <i class="lw-key">G</i> Reden · <i class="lw-key">B</i> Fahren · <i class="lw-key">Esc</i> Pause</p>
+    <div id="lwCam" class="lw-cam lw-char hidden"><b id="lwCamB">KAMERA SIEHT DICH</b><i><s id="lwCamBar"></s></i></div>
+    <div id="lwArrest" class="lw-arrest lw-char hidden"><b>HAUSARREST</b><span id="lwArrestT">1:00</span><small>Niemand klopft</small></div>
+    <div id="lwAlarm" class="lw-alarm hidden"><div class="vig"></div><div class="lw-alcard lw-char"><div class="lw-alring"><svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="34"/><circle id="lwAlArc" class="p" cx="40" cy="40" r="34"/></svg><b id="lwAlTime">10</b></div><div class="lw-altext"><small>Achtung</small><h3 id="lwAlWho">MAMA KOMMT!</h3><ul><li id="lwAlBox"><i></i>Box unters Bett <span class="lw-key">E</span></li><li id="lwAlMat"><i></i>Materialkiste in den Schrank <span class="lw-key">E</span></li><li id="lwAlChairs"><i></i>Stühle der Kumpels wegräumen <span class="lw-key">E</span></li><li id="lwAlLuke" class="off"><i></i>Falltür zu, Teppich drüber <span class="lw-key">F</span></li><li id="lwAlHand"><i></i>Taschen leer machen <span class="lw-key">F</span> an der Box</li></ul><p id="lwAlTip"></p></div></div></div>
+    <div id="lwResult" class="lw-result hidden"><div class="lw-rcard lw-char"><h3 id="lwResT">ERWISCHT!</h3><p id="lwResText"></p></div></div>
+    <div class="lw-cinebar top"></div><div class="lw-cinebar bot"></div>
+    <div id="lwSub" class="lw-sub hidden"><b id="lwSubN"></b><span id="lwSubT"></span></div>
+    <div id="lwTitle" class="lw-title"><small>Theos Seitenscheidel präsentiert</small><b>LUDWIG ZIGARETTI</b><span>Der Weg zum Zigarettenboss</span></div>
+    <div id="lwFade" class="lw-fade"></div>
+    <div id="lwToast" class="lw-toast lw-char"></div>
+    <div id="lwDeal" class="cs-over lw-dover hidden"><div class="lw-card lw-deal">
+      <p class="label">Am Fenster</p><h2 id="lwDName"></h2><p id="lwDText" class="lw-dtext"></p><p id="lwDWant" class="lw-dwant"></p>
+      <div class="lw-drow"><span>Menge</span><button id="lwDMinusN" type="button">–</button><b id="lwDN">1</b><button id="lwDPlusN" type="button">+</button></div>
+      <div class="lw-drow"><span>Preis pro Stück</span><button id="lwDMinusP" type="button">–</button><b id="lwDP"></b><button id="lwDPlusP" type="button">+</button></div>
+      <p class="lw-dsum">Zusammen: <b id="lwDSum"></b></p><p id="lwDHand" class="lw-dhand"></p><p id="lwDTries" class="lw-dtries"></p>
+      <div class="foot"><button id="lwDClose" type="button"><kbd>Esc</kbd>Zurück</button><button id="lwDOffer" type="button" class="primary"><kbd>Enter</kbd>Anbieten</button></div>
+    </div></div>
+    <div id="lwPC" class="lw-pcwrap hidden"></div>
+    <div id="lwBPC" class="lw-pcwrap hidden"></div>
+    <div id="lwPhone" class="lw-phone hidden"></div>
+    <div id="lwFinale" class="lw-finale hidden"><div class="lw-fcig"><i class="f"></i><i class="p"></i><i class="e"></i><i class="s1"></i><i class="s2"></i><i class="s3"></i></div><div class="lw-fcard"><small>Das Finale</small><h2>LUDWIG IST DER ZIGARETTENBOSS</h2><p>Die Riesenzigarette brennt über der ganzen Stadt. Mama und Papa haben nichts gemerkt. Fast nichts.</p><p id="lwFinStats" class="lw-fstats"></p><button id="lwFinOk" type="button" class="primary">Weiterdrehen</button></div></div>
+    <div id="lwKiosk" class="cs-over hidden"><div class="lw-card lw-kiosk">
+      <p id="lwKioskLabel" class="label">Hinterhof vom Kiosk</p><h2 id="lwKioskWho">Kalle</h2><div class="lw-brick"></div><p id="lwKalle" class="lw-kalle"></p>
+      <div id="lwKioskList" class="lw-klist"></div><p id="lwKioskSack" class="lw-ksack"></p>
+      <div class="foot"><span class="lw-kgeld">Kasse: <b id="lwKioskGeld"></b></span><button id="lwKioskClose" type="button" class="primary"><kbd>K</kbd>Zurück ins Zimmer</button></div>
+    </div></div>
+    <div id="lwSettings" class="cs-over hidden"><div class="lw-card lw-set"><p class="label">Einstellungen</p><h2>Ludwig Zigaretti</h2>
+      <h3>Ton</h3><div class="slider"><label for="lwVolMaster">Gesamt</label><input id="lwVolMaster" type="range" min="0" max="100" step="5"><span id="lwVolMasterV"></span></div><div class="slider"><label for="lwVolVoice">Stimmen (Dialoge)</label><input id="lwVolVoice" type="range" min="0" max="150" step="5"><span id="lwVolVoiceV"></span></div><div class="slider"><label for="lwVolSfx">Geräusche</label><input id="lwVolSfx" type="range" min="0" max="150" step="5"><span id="lwVolSfxV"></span></div><div class="slider"><label for="lwVolAmb">Umgebung</label><input id="lwVolAmb" type="range" min="0" max="150" step="5"><span id="lwVolAmbV"></span></div>
+      <div class="opt"><div><b>Untertitel</b><small>Der Text unten, wenn jemand spricht.</small></div><div class="seg" id="lwSegSubs"><button type="button" data-v="off">Aus</button><button type="button" data-v="on">An</button></div></div>
+      <h3>Grafik</h3><div class="opt"><div><b>Bildschärfe</b><small>Niedriger läuft flüssiger, höher sieht schärfer aus.</small></div><div class="seg" id="lwSegRes"><button type="button" data-v="0.6">Niedrig</button><button type="button" data-v="0.8">Mittel</button><button type="button" data-v="1">Hoch</button><button type="button" data-v="1.35">Sehr hoch</button></div></div>
+      <div class="opt"><div><b>Schatten</b><small>Ohne Schatten läuft das Spiel flüssiger.</small></div><div class="seg" id="lwSegShadow"><button type="button" data-v="off">Aus</button><button type="button" data-v="on">An</button></div></div>
+      <div class="opt"><div><b>Effekte im Bunker</b><small>Nebel und Staub in der Luft.</small></div><div class="seg" id="lwSegFx"><button type="button" data-v="off">Aus</button><button type="button" data-v="on">An</button></div></div>
+      <h3>Steuerung</h3><div class="slider"><label for="lwMouse">Maus-Empfindlichkeit</label><input id="lwMouse" type="range" min="30" max="250" step="10"><span id="lwMouseV"></span></div>
+      <p class="lw-stimmen">Stimmen: künstlich erzeugt mit elevenlabs.io und Fish Audio</p><div class="foot"><button id="lwSetBack" type="button" class="primary"><kbd>Esc</kbd>Zurück</button></div></div></div>
+    <div id="lwPause" class="cs-over hidden"><div class="lw-card cs-resultcard"><p class="label">Pause</p><h2>Kurz durchatmen</h2><p class="cs-lead">Ludwig wartet. Draußen auch.</p><div class="lw-code"><input id="lwCode" type="text" maxlength="16" placeholder="Code eingeben" autocomplete="off" spellcheck="false"><button id="lwCodeGo" type="button">OK</button></div><div class="foot"><button id="lwQuit" type="button">Verlassen</button><button id="lwReplay" type="button">Vorspann ansehen</button><button id="lwHelp" type="button">Kurz erklärt</button><button id="lwSetBtn" type="button">Einstellungen</button><button id="lwResume" type="button" class="primary">Weiter</button></div></div></div>
+  </div>
+  <div id="bruno" class="bb-hud hidden">
+    <div id="bbLoad" class="bb-load hidden"><b>☄</b><span id="bbLoadT">Das Raumschiff wird betankt …</span></div>
+    <div class="bb-top"><div class="bb-toprow"><div id="bbDay" class="bb-day">TAG 1</div><div class="bb-count"><span id="bbCount"></span><em>m³ übrig</em></div></div><div class="bb-clock"><i id="bbClockF"></i></div><small id="bbGoal" class="bb-goal"></small></div>
+    <div id="bbAirBig" class="bb-airbig hidden"><small>LUFT</small><b id="bbAirBigT">0:29</b><i><em id="bbAirBigF"></em></i></div>
+    <div id="bbPlayers" class="bb-players"></div>
+    <div id="bbQuest" class="bb-quest"><small id="bbQuestN">Aufgabe</small><b id="bbQuestT"></b><p id="bbQuestD"></p></div>
+    <div id="bbMsg" class="bb-msg hidden"><small>📡 ERDE AM APPARAT</small><b id="bbMsgH"></b><p id="bbMsgT"></p></div>
+    <div id="bbCross" class="bb-cross"></div>
+    <div id="bbRecall" class="bb-recall hidden"><i></i><span>Strahl kommt …</span></div>
+    <div id="bbPrompt" class="bb-prompt hidden"></div>
+    <div id="bbToast" class="bb-toast"></div>
+    <div id="bbSold" class="bb-sold hidden"><small>ERZ ABGEGEBEN</small><b id="bbSoldV">+0 ₵</b><div id="bbSoldL"></div></div>
+    <div class="bb-stats"><div class="bb-purse"><small>Credits</small><b id="bbPurse">0 ₵</b></div><div id="bbRank" class="bb-meter rank"><small>Rang</small><i><em id="bbRankF"></em></i><span id="bbRankT"></span></div><div id="bbCargo" class="bb-meter"><small>Rucksack</small><i><em id="bbCargoF"></em></i><span id="bbCargoT"></span></div><div id="bbAir" class="bb-meter air"><small>Luft</small><i><em id="bbAirF"></em></i><span id="bbAirT"></span></div></div>
+    <div id="bbBar" class="bb-bar"></div>
+    <div id="bbTerm" class="bb-term hidden"><div class="bb-tscreen">
+      <header><b>TERMINAL 03</b><span>TS-1 · HANDELSDEPOT</span><i id="bbTDay">● TAG 1</i><button id="bbTermClose" type="button">ESC · SCHLIESSEN</button></header>
+      <div class="bb-tgrid">
+        <aside>
+          <section class="bb-tcard"><small>KASSE</small><div id="bbTPurse" class="bb-tbig">0 ₵</div><p id="bbTBonus"></p></section>
+          <section class="bb-tcard"><small>RUCKSACK</small><div id="bbTCargo"></div><p id="bbTHint" class="bb-thint"></p></section>
+          <section class="bb-tcard"><small>NÄCHSTES WERKZEUG</small><b id="bbTNext"></b><div class="bb-tprog"><i id="bbTNextF"></i></div><p id="bbTNextT"></p></section>
+          <p id="bbTStats" class="bb-tstats"></p>
+        </aside>
+        <main><nav id="bbTermTabs"><button type="button" data-tab="tools">WERKZEUGE</button><button type="button" data-tab="up">AUSBAU</button></nav><div id="bbTermBody" class="bb-tcards"></div></main>
+      </div>
+    </div></div>
+    <div id="bbOrbitUI" class="bb-panel hidden"><div class="bb-phead"><h2>Orbit-Konsole</h2><button id="bbOrbitClose" type="button">Schließen</button></div><div id="bbOrbitBody" class="bb-pbody"></div></div>
+    <div id="bbPause" class="bb-panel bb-pause hidden"><h2>Pause</h2><p class="bb-sub">Online läuft die Zeit weiter.</p><button id="bbResume" type="button" class="primary">Weiter</button><button id="bbHelp" type="button">Anleitung</button><button id="bbIntro" type="button">Vorspann nochmal ansehen</button><button id="bbRestart" type="button">Nochmal von vorn</button><button id="bbQuit" type="button">Zurück zum Schrank</button></div>
+    <div id="bbFlash" class="bb-flash"></div>
+    <div id="bbFade" class="bb-fade"></div>
+  </div>
+  <div id="strom" class="st-hud hidden">
+    <div id="stLoad" class="st-load hidden"><b>⚡</b><span id="stLoadT">Die Halle wird aufgeschlossen …</span></div>
+    <div id="stTop" class="st-top"><div class="st-money"><small>Kasse</small><b id="stMoney">0 €</b></div><div class="st-clock"><b id="stClock">06:00</b><small id="stDay"></small></div><div class="st-sus"><small>Verdacht der Polizei</small><i><em id="stSusBar"></em></i></div><div class="st-lvl"><small id="stLvlT">Level 1</small><i><em id="stLvlBar"></em></i></div></div>
+    <div id="stPlayers" class="st-players"></div>
+    <div id="stQuest" class="st-quest"><small id="stQuestN">Aufgabe</small><b id="stQuestT"></b><i><em id="stQuestBar"></em></i><span id="stQuestP"></span><div id="stJob" class="st-job hidden"></div></div>
+    <div id="stCross" class="st-cross"></div>
+    <div id="stPrompt" class="st-prompt hidden"><span id="stPE"><kbd>E</kbd><span id="stPromptT"></span></span><span id="stPF"><kbd>F</kbd><span id="stPromptT2"></span></span></div>
+    <div id="stCarry" class="st-carry hidden"></div>
+    <div id="stBuff" class="st-buff hidden"></div>
+    <div id="stMeter" class="st-meter hidden"><small id="stMeterT"></small><i><em id="stMeterBar"></em></i><span>E gedrückt halten · loslassen hört auf</span></div>
+    <div id="stDrive" class="st-drive hidden"><b id="stKmh">0</b><small>km/h</small><em id="stLoadV"></em><span>W/S Gas und Bremse · A/D lenken · Leertaste Handbremse · E aussteigen</span></div>
+    <div id="stHint" class="st-hint"></div>
+    <div id="stToast" class="st-toast"></div>
+    <div id="stBox" class="st-box hidden"><small id="stBoxS"></small><b id="stBoxH"></b><p id="stBoxT"></p><div id="stBoxA" class="st-boxa"></div></div>
+    <div id="stShop" class="st-panel st-shop hidden"><div class="st-ph"><h2 id="stShopH">Schwarzmarkt</h2><b id="stShopMoney"></b><button id="stShopClose" type="button">Schließen (Esc)</button></div><div id="stShopTabs" class="st-tabs"></div><div id="stShopList" class="st-list"></div></div>
+    <div id="stTab" class="st-panel hidden"><div class="st-ph"><h2>Übersicht</h2><b id="stTabMoney"></b><button id="stTabClose" type="button">Schließen (Tab)</button></div><div id="stTabTabs" class="st-tabs"></div><div id="stTabBody" class="st-list"></div></div>
+    <div id="stPC" class="st-panel hidden"><div class="st-ph"><h2 id="stPCH">PC im Büro</h2><b id="stPCMoney"></b><button id="stPCClose" type="button">Schließen (Esc)</button></div><div id="stPCTabs" class="st-tabs"></div><div id="stPCBody" class="st-list"></div></div>
+    <div id="stFade" class="st-fade"></div>
+    <div id="stCut" class="st-cut hidden"><div class="st-bars"><i></i><i></i></div><div id="stCutTitle" class="st-cuttitle"><small id="stCutK"></small><b id="stCutH"></b><span id="stCutS"></span></div><p id="stCutLine" class="st-cutline"></p><p id="stCutCard" class="st-cutcard"></p><div class="st-cutskip"><span>Leertaste halten oder Esc: überspringen</span><i id="stCutBar"></i></div></div>
+    <div id="stMap" class="st-map hidden"><canvas id="stMapC"></canvas><div class="st-maph"><b>Karte</b><span>M oder Esc schließen · Mausrad zoomen</span></div></div>
+    <div id="stPause" class="st-panel st-pause hidden"><h2>Pause</h2><button id="stResume" type="button" class="primary">Weiterspielen</button><button id="stHelp" type="button">Steuerung und Regeln</button><button id="stIntro" type="button">Vorspann ansehen</button><button id="stOutro" type="button" class="hidden">Abspann ansehen</button><button id="stQuit" type="button">Zurück zum Schrank</button></div>
+    <div class="st-keys"><kbd>M</kbd> Karte <kbd>Tab</kbd> Übersicht <kbd>Esc</kbd> Pause</div>
+  </div>
+  <div id="ozean" class="oz-hud hidden">
+    <div id="ozLoad" class="oz-load hidden"><b>🌊</b><span id="ozLoadT">Der Ozean wird eingelassen …</span></div>
+    <div class="oz-top"><div class="oz-money"><small>Kasse</small><b id="ozMoney">0 €</b></div><div id="ozSalzBox" class="oz-salz"><small>Meersalz</small><b id="ozSalz">0</b><span>K: Skillbaum</span></div><div id="ozTankBox" class="oz-tank"><small id="ozTankT">Glas</small><i><em id="ozTankBar"></em></i></div><div id="ozSeaBox" class="oz-sea"><small id="ozSeaT"></small><i><em id="ozSeaBar"></em></i><span id="ozSeaP"></span></div><div class="oz-clock"><b id="ozClock">07:00</b><small id="ozDay"></small></div></div>
+    <div id="ozPlayers" class="oz-players"></div>
+    <div id="ozQuest" class="oz-quest"><small id="ozQuestN">Aufgabe</small><b id="ozQuestT"></b><i><em id="ozQuestBar"></em></i><span id="ozQuestP"></span></div>
+    <div id="ozCross" class="oz-cross"></div>
+    <div id="ozPrompt" class="oz-prompt hidden"><span id="ozPE"><kbd>E</kbd><span id="ozPromptT"></span></span><span id="ozPF"><kbd>F</kbd><span id="ozPromptT2"></span></span></div>
+    <div id="ozTool" class="oz-tool"><b id="ozToolN">Wasserglas</b><small id="ozToolR"></small><div class="oz-firma"><small id="ozFirmaT"></small><i><em id="ozFirmaBar"></em></i><span id="ozFirmaN"></span></div></div>
+    <div id="ozMeter" class="oz-meter hidden"><small id="ozMeterT"></small><i><em id="ozMeterBar"></em></i><span>E gedrückt halten · loslassen hört auf</span></div>
+    <div id="ozDrive" class="oz-drive hidden"><b id="ozKmh">0</b><small>km/h</small><em id="ozLoadV"></em><span id="ozDriveKeys"></span></div>
+    <div id="ozHint" class="oz-hint"></div>
+    <div id="ozToast" class="oz-toast"></div>
+    <div id="ozBox" class="oz-box hidden"><small id="ozBoxS"></small><b id="ozBoxH"></b><p id="ozBoxT"></p><div id="ozBoxA" class="oz-boxa"></div></div>
+    <div id="ozShop" class="oz-panel hidden"><div class="oz-ph"><h2>Wasserhändler · Laden</h2><b id="ozShopMoney"></b><button id="ozShopClose" type="button">Schließen (Esc)</button></div><div id="ozShopTabs" class="oz-tabs"></div><div id="ozShopList" class="oz-list"></div></div>
+    <div id="ozPC" class="oz-panel oz-pc hidden"><div class="oz-ph"><h2>OzeanOS</h2><b id="ozPCMoney"></b><button id="ozPCClose" type="button">Schließen (Esc)</button></div><div id="ozPCTabs" class="oz-tabs"></div><div id="ozPCMapBox" class="oz-pcmap"><canvas id="ozPCMap"></canvas></div><div id="ozPCBody" class="oz-list"></div></div>
+    <div id="ozMap" class="oz-map hidden"><canvas id="ozMapC"></canvas><div class="oz-maph"><b>Karte</b><span>M oder Esc schließen · Mausrad zoomen</span><button id="ozMapClose" type="button">Schließen</button></div></div>
+    <div id="ozPause" class="oz-panel oz-pause hidden"><h2>Pause</h2><button id="ozResume" type="button" class="primary">Weiterspielen</button><button id="ozHelp" type="button">Steuerung und Regeln</button><button id="ozSkillBtn" type="button">Skillbaum (K)</button><button id="ozFull" type="button">Vollbild an/aus (F11)</button><button id="ozIntro" type="button">Vorspann ansehen</button><button id="ozMitte" type="button" class="hidden">Zwischenszene ansehen</button><button id="ozOutro" type="button" class="hidden">Abspann ansehen</button><button id="ozQuit" type="button">Zurück zum Schrank</button></div>
+    <div id="ozFade" class="oz-fade"></div>
+    <div id="ozCut" class="oz-cut hidden"><div id="ozUnder" class="oz-under"></div><div id="ozPhone" class="oz-phone"><div id="ozPhoneIn" class="oz-phonein"></div></div><div class="oz-bars"><i></i><i></i></div><div id="ozCutTitle" class="oz-cuttitle"><small id="ozCutK"></small><b id="ozCutH"></b><span id="ozCutS"></span></div><p id="ozCutLine" class="oz-cutline"></p><p id="ozCutCard" class="oz-cutcard"></p><div class="oz-cutskip"><span>Leertaste halten oder Esc: überspringen</span><i id="ozCutBar"></i></div></div>
+    <div class="oz-keys"><kbd>E</kbd> benutzen <kbd>F</kbd> Laden <kbd>K</kbd> Skills <kbd>M</kbd> Karte <kbd>Esc</kbd> Pause <kbd>F11</kbd> Vollbild</div>
+    <div id="ozSkill" class="oz-panel oz-skill hidden"><div class="oz-ph"><h2>Skillbaum</h2><b id="ozSkillSalz"></b><button id="ozSkillClose" type="button">Schließen (K oder Esc)</button></div><p id="ozSkillHow" class="oz-note"></p><div id="ozSkillTree" class="oz-tree"></div></div>
+  </div>
+  <div id="casino" class="ca-hud hidden">
+    <div id="caTop" class="ca-top">
+      <div class="ca-purse"><span>Familienkasse</span><b id="caPurse">25,00 €</b><small id="caLevel">Level 1 · Rubbellos-Saal</small></div>
+      <div class="ca-mid">
+        <div id="caClock" class="ca-clock" data-luck="normal">
+          <div class="ca-ck-day"><b id="caDayT">Montag</b><small id="caDayN">Woche 1 · Tag 1</small></div>
+          <div id="caTime" class="ca-ck-time">10:00</div>
+          <div class="ca-ck-luck"><small>Glückssträhne</small><div class="ca-ck-bar"><i id="caLuckBar"></i></div><b id="caLuckT">normal</b></div>
+        </div>
+        <div id="caEvs" class="ca-evs"></div>
+        <div class="ca-goal"><span id="caGoalT"></span><div class="ca-bar"><i id="caGoalBar"></i></div></div>
+      </div>
+      <div class="ca-side"><div id="caMissions" class="ca-missions"></div><div class="ca-row"><span id="caCoins" class="ca-coins"></span><button id="caInvBtn" type="button" class="ca-invbtn">Inventar <kbd>Tab</kbd><i id="caInvN" class="hidden"></i></button></div></div>
+    </div>
+    <div id="caPlayers" class="ca-players"></div>
+    <div id="caCross" class="ca-cross"></div>
+    <div id="caPrompt" class="ca-prompt hidden"><kbd>E</kbd><span id="caPromptT"></span></div>
+    <div id="caToast" class="ca-toast"></div>
+    <div id="caWin" class="ca-win"><small id="caWinS"></small><b id="caWinB"></b></div>
+    <p id="caHint" class="ca-hint"></p>
+    <div id="caTable" class="ca-table hidden">
+      <div class="ca-tinfo"><b id="caTName"></b><p id="caTRule"></p><p id="caTCoin" class="ca-tcoin"></p><div id="caTList" class="ca-tlist"></div></div>
+      <div class="ca-tbtns"><button id="caTAuto" type="button">Alles aufrubbeln (R)</button><button id="caTCash" type="button" class="primary hidden">Kasse machen</button><button id="caTNext" type="button">Nächstes Los (N)</button><button id="caTUp" type="button">Aufstehen (Esc)</button></div>
+    </div>
+    <div id="caShop" class="cs-over ca-over hidden"><div class="ca-shop">
+      <header><div><p class="ca-kicker">Teo's Casino</p><h2>Rubbellos-Stand</h2></div><div class="ca-shoppurse"><span>Familienkasse</span><b id="caShopPurse"></b></div><button id="caShopClose" type="button"><kbd>Esc</kbd>Schließen</button></header>
+      <div class="ca-shopbody"><div id="caShopGrid" class="ca-shopgrid"></div>
+        <aside class="ca-detail"><img id="caShopImg" alt=""><h3 id="caShopName"></h3><p id="caShopRule"></p><p id="caShopInfo" class="ca-info"></p><p id="caShopLuck" class="ca-shopluck"></p><div class="ca-buy"><button id="caBuy1" type="button" class="primary"></button><button id="caBuy3" type="button"></button><button id="caBuy10" type="button"></button></div><button id="caGift" type="button" class="ca-gift hidden">Geschenk vom Haus annehmen</button><p id="caShopSeen" class="ca-info"></p></aside></div>
+    </div></div>
+    <div id="caInv" class="cs-over ca-over hidden"><div class="ca-inv">
+      <header><div><p class="ca-kicker">Die Familie</p><h2>Inventar</h2></div><div class="ca-shoppurse"><span>Familienkasse</span><b id="caInvPurse"></b></div><button id="caInvClose" type="button"><kbd>Esc</kbd>Schließen</button></header>
+      <div id="caInvTabs" class="ca-tabs"><button type="button" data-tab="lose">Meine Lose</button><button type="button" data-tab="stats">Statistik und Aufgaben</button><button type="button" data-tab="plan">Teos Plan</button></div>
+      <div id="caInvBody" class="ca-invbody"></div>
+    </div></div>
+    <div id="caPause" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Teo's Casino</p><h2>Pause</h2><div class="ca-pausebtns"><button id="caResume" type="button" class="primary">Weiter</button><button id="caSoundBtn" type="button">Ton einstellen</button><button id="caHelp" type="button">Steuerung und Regeln</button><button id="caIntroAgain" type="button">Intro noch einmal ansehen</button><button id="caQuit" type="button">Casino verlassen</button></div></div></div>
+    <div id="caExit" class="cs-over hidden"><div class="cs-card cs-resultcard"><h2>Casino verlassen?</h2><p id="caExitText"></p><div class="foot"><button id="caExitNo" type="button">Bleiben</button><button id="caExitYes" type="button" class="primary">Verlassen</button></div></div></div>
+    <div id="caLoad" class="ca-load hidden"><div class="ca-load-in"><p class="ca-kicker">Theos Seitenscheidel präsentiert</p><h1>TEO'S CASINO</h1><i class="ca-spin"></i><p id="caLoadT">Teo’s Casino öffnet die Türen …</p><small>Beim ersten Öffnen werden Halle, Automaten und Lichter vorbereitet.</small></div></div>
+    <div id="caSlots" class="ca-slots hidden"><div class="ca-slots-in">
+      <p class="ca-kicker">Teo's Casino</p><h2>Spielstände</h2>
+      <div id="caSlotList" class="ca-slotlist"></div>
+      <div class="ca-slotnew"><input id="caSlotNewName" type="text" maxlength="32" placeholder="Name des Spielstands"><button id="caSlotNew" type="button" class="primary">Neuer Spielstand</button></div>
+      <button id="caSlotBack" type="button" class="ca-slotback">Zurück zum Schrank</button>
+    </div></div>
+    <div id="caCoinShop" class="cs-over ca-over hidden"><div class="ca-coinshop">
+      <header><div><p class="ca-kicker">Teo's Casino</p><h2>Münzkabinett</h2></div><div class="ca-shoppurse"><span>Familienkasse</span><b id="caCoinPurse"></b></div><button id="caCoinClose" type="button"><kbd>Esc</kbd>Schließen</button></header>
+      <p class="ca-coinlead">Mit welcher Münze du rubbelst, zählt: Glücksmünzen machen gute Lose wahrscheinlicher, Geldmünzen vervielfachen den Gewinn. Jede Münze hält eine Anzahl Lose, am Rubbeltisch wechselst du mit C.</p>
+      <div id="caCoinGrid" class="ca-coingrid"></div>
+    </div></div>
+    <div id="caSnd" class="cs-over hidden"><div class="cs-card ca-sndcard"><p class="label">Teo's Casino</p><h2>Ton</h2><p class="ca-sndnote">Jeder Casino-Sound einzeln (0 bis 150 %). Alle anderen Spiele: Hauptmenü, Einstellungen, Ton.</p><div id="caSndList" class="mixlist ca-sndlist"></div><div class="foot"><button id="caSndReset" type="button">Casino-Töne auf 100 %</button><button id="caSndClose" type="button" class="primary">Zurück</button></div></div></div>
+    <div id="caATM" class="cs-over hidden"><div class="ca-atm"><div class="ca-atm-head"><b>TEO BANK</b><span>Sofortkredit · 24 h</span><em>Familienkasse <b id="caATMPurse"></b></em></div><div id="caATMBody" class="ca-atm-body"></div><button id="caATMClose" type="button"><kbd>Esc</kbd>Karte entnehmen</button></div></div>
+    <div id="caSlot" class="ca-slot hidden">
+      <div class="ca-sl-info"><b id="caSlName"></b><p>10 Gewinnlinien · Teo ersetzt alle Symbole · 3 Bonus-Münzen bringen Freispiele mit doppelten Gewinnen</p><p id="caSlLuck" class="ca-sl-luck"></p></div>
+      <div class="ca-sl-bet"><button id="caSlMinus" type="button">−</button><div><small>Einsatz</small><b id="caSlBet"></b></div><button id="caSlPlus" type="button">+</button></div>
+      <div class="ca-sl-btns"><button id="caSlSpin" type="button" class="primary">Drehen (Leertaste)</button><button id="caSlAuto" type="button">Auto (R)</button><button id="caSlUp" type="button">Aufstehen (Esc)</button></div>
+    </div>
+    <div id="caBJ" class="ca-bj hidden">
+      <div class="ca-sl-info"><b id="caBJName"></b><p>Blackjack zahlt 3:2 · Dealer steht ab 17 · Verdoppeln auf zwei Karten · einmal Teilen</p><p id="caBJLuck" class="ca-sl-luck"></p></div>
+      <div class="ca-bj-state"><div><small>Dealer</small><b id="caBJDealer">–</b></div><div><small>Du</small><b id="caBJMe">–</b></div><p id="caBJMsg"></p></div>
+      <div class="ca-sl-bet"><button id="caBJMinus" type="button">−</button><div><small>Einsatz</small><b id="caBJBet"></b></div><button id="caBJPlus" type="button">+</button></div>
+      <div class="ca-bj-btns"><button id="caBJDeal" type="button" class="primary">Austeilen (Leertaste)</button><button id="caBJHit" type="button">Karte (H)</button><button id="caBJStand" type="button">Stehen (S)</button><button id="caBJDouble" type="button">Verdoppeln (D)</button><button id="caBJSplit" type="button">Teilen (T)</button><button id="caBJTip" type="button">Teos Tipp (Q)</button><button id="caBJUp" type="button">Aufstehen (Esc)</button></div>
+    </div>
+    <div id="caRou" class="ca-rou hidden">
+      <div class="ca-rou-top"><div class="ca-sl-info"><b id="caRouName"></b><p id="caRouLuck" class="ca-sl-luck"></p></div><div id="caRouLast" class="ca-rou-last"></div></div>
+      <div class="ca-rou-main"><div class="ca-rou-wrap"><div id="caRouBoard" class="ca-rou-board"></div></div>
+        <div class="ca-rou-side"><div id="caRouChips" class="ca-rou-chips"></div><div class="ca-rou-sum"><small>Einsatz</small><b id="caRouSum">0 €</b></div><button id="caRouSpin" type="button" class="primary">Drehen (Leertaste)</button><div class="ca-rou-row"><button id="caRouClear" type="button">Löschen (⌫)</button><button id="caRouAgain" type="button">Nochmal (R)</button></div><button id="caRouUp" type="button">Aufstehen (Esc)</button></div></div>
+      <p id="caRouMsg" class="ca-rou-msg"></p>
+    </div>
+    <div id="caArc" class="ca-arc hidden">
+      <div class="ca-sl-info"><b id="caArcName"></b><p id="caArcRule"></p><p id="caArcLuck" class="ca-sl-luck"></p></div>
+      <div id="caArcOpts" class="ca-arc-opts"></div>
+      <div class="ca-sl-bet"><button id="caArcMinus" type="button">−</button><div><small id="caArcBetL">Einsatz</small><b id="caArcBet"></b></div><button id="caArcPlus" type="button">+</button></div>
+      <div class="ca-arc-btns"><button id="caArcGo" type="button" class="primary">Los (Leertaste)</button><button id="caArcAuto" type="button">Auto (R)</button><button id="caArcUp" type="button">Aufstehen (Esc)</button></div>
+      <p id="caArcMsg" class="ca-arc-msg"></p>
+    </div>
+    <div id="caOver" class="ca-overlay hidden"><div class="ca-ov-in"><p class="ca-kicker">Teo's Casino</p><h1>Pleite</h1><p id="caOvText"></p><div id="caOvStats" class="ca-ov-stats"></div><div class="ca-ov-btns"><button id="caOvNew" type="button" class="primary">Neu anfangen</button><button id="caOvGal" type="button">Zum Schrank</button></div></div></div>
+    <div id="caBanner" class="ca-banner"><small id="caBanK"></small><b id="caBanH"></b><span id="caBanT"></span></div>
+    <div id="caDuel" class="ca-duel hidden">
+      <header><small>Rubbel-Duell</small><b>Du gegen Big Bruno</b></header>
+      <div class="ca-drow"><span class="ca-dname">Du</span><div id="caDuelMe" class="ca-dslots"></div><b id="caDuelMeT">0 €</b></div>
+      <div class="ca-drow bruno"><span class="ca-dname">Bruno</span><div id="caDuelHim" class="ca-dslots"></div><b id="caDuelHimT">0 €</b></div>
+      <p id="caDuelInfo"></p>
+    </div>
+    <div id="caPC" class="cs-over ca-pcover hidden"><div class="ca-pc">
+      <div class="ca-pcbar"><i class="ca-pclogo">T</i><b>TeoOS</b><span class="ca-pcsub">Familien-PC</span><span class="ca-pcpurse">Familienkasse <b id="caPCPurse"></b></span><span id="caPCClock" class="ca-pcclock"></span><button id="caPCClose" type="button"><kbd>Esc</kbd>Ausschalten</button></div>
+      <div class="ca-pcmain">
+        <nav id="caPCNav" class="ca-pcnav"><button type="button" data-tab="glueck"><i>☘</i>Glücks-Upgrades</button><button type="button" data-tab="deko"><i>✦</i>Wohnung</button><button type="button" data-tab="vertraege"><i>§</i>Verträge</button><button type="button" data-tab="kalender"><i>▦</i>Kalender</button></nav>
+        <section id="caPCBody" class="ca-pcbody"></section>
+      </div>
+    </div></div>
+    <div id="caDayCard" class="ca-daycard hidden"><div class="ca-dc-in">
+      <p id="caDcK" class="ca-kicker"></p><h1 id="caDcH"></h1><p id="caDcS" class="ca-dc-sub"></p>
+      <div id="caDcRep" class="ca-dc-rep hidden"></div>
+      <div id="caDcEv" class="ca-dc-ev"></div>
+      <button id="caDcGo" type="button" class="primary">Los geht's <kbd>E</kbd></button>
+    </div></div>
+    <div id="caCut" class="ca-cut hidden"><div class="ca-bars"><i></i><i></i></div>
+      <div id="caCutTitle" class="ca-cuttitle"><small id="caCutK"></small><b id="caCutH"></b><span id="caCutS"></span></div>
+      <p id="caCutLine" class="ca-cutline"></p>
+      <div class="ca-cutskip"><span>Leertaste halten oder Esc: überspringen</span><i id="caCutBar"></i></div>
+    </div>
+    <div id="caDayFade" class="ca-dayfade"></div>
+    <div id="caStory" class="ca-story hidden"><div id="caFade" class="ca-fade"></div><div class="ca-bars"><i></i><i></i></div><p id="caStoryT" class="ca-st"></p><h1 id="caStoryH" class="ca-sth"></h1><p id="caStoryCap" class="ca-cap"></p><div class="ca-skip"><button id="caSkipBtn" type="button">Überspringen</button><span>oder Leertaste halten</span><i id="caSkipBar"></i></div></div>
+  </div>
+  <div id="parkHud" class="pk-hud hidden">
+    <div class="pk-top"><b id="pkName"></b><span id="pkInfo"></span></div>
+    <div class="pk-clock" id="pkTime"></div>
+    <div class="pk-roles" id="pkRoles"></div>
+    <div class="pk-arrow" id="pkArrow"><i id="pkArrowI">▲</i><small id="pkDist"></small></div>
+    <div class="pk-sens" id="pkSens"><i></i><i></i><i></i><i></i></div>
+    <div class="pk-gear" id="pkGear"><span data-g="-1">R</span><span data-g="1">1</span><span data-g="2">2</span><span data-g="3">3</span><b id="pkKmh">0</b><small>km/h</small></div>
+    <div class="pk-hold hidden" id="pkHold"><small>Stehen bleiben</small><div><i id="pkHoldI"></i></div></div>
+    <div class="pk-toast hidden" id="pkToast"></div>
+    <div class="pk-help" id="pkHelp"></div>
+  </div>
+  <div id="pkFlash" class="pk-flash hidden"></div>
+  <div id="pkIntro" class="pk-intro hidden"><small id="pkIntroT"></small><h2 id="pkIntroN"></h2><p id="pkBlurb"></p><em><kbd>Enter</kbd>Losfahren</em></div>
+
+  <section id="moonTitle" class="mo-title hidden">
+    <div class="mo-logo"><span>MOON</span><span class="o">SWEEPER</span><b>2</b></div>
+    <p class="mo-slogan">Ein ganzer Mond zu putzen. Eine Zahnbürste zum Start.</p>
+    <p class="mo-sub">Sammelt und verkauft Mondstaub in Teams bis zu 3 Spielern. Verbessert eure Werkzeuge, schaltet Reinigungsfahrzeuge frei und macht aus einem absurden Job ein florierendes Unternehmen – sofern eure Freunde tatsächlich mithelfen.</p>
+    <div class="mo-btns"><button id="moContinue" type="button" class="primary">Weiterputzen</button><button id="moNew" type="button">Firma gründen</button><button id="moCoop" type="button">Mit Freunden putzen</button><button id="moExit" type="button">Zurück zum Hauptmenü</button></div>
+    <small id="moSaveInfo"></small>
+  </section>
+
+  <div id="moonHud" class="mo-hud hidden">
+    <div class="mo-tl"><small id="moCompany"></small><b id="moCredits">0 Cr</b><span id="moPrice"></span></div>
+    <div class="mo-compass" id="moCompass"></div>
+    <div class="mo-trbox">
+      <div class="mo-tr"><canvas id="moRing" width="96" height="96"></canvas><div><b id="moPct">0 %</b><small>des Mondes geputzt</small></div></div>
+      <div class="mo-guide" id="moGuide"><header><b id="moGuideH">Erste Schritte</b><span id="moGuideN"></span></header><h4 id="moGuideT"></h4><p id="moGuideD"></p><div class="mo-gw" id="moGuideW"></div><small>H blendet die Hilfe aus</small></div>
+    </div>
+    <div class="mo-tank" id="moTank"><div class="mo-gauge"><i id="moTankFill"></i></div><div><b id="moTankText"></b><small id="moTankLabel"></small></div></div>
+    <div class="mo-hotbar" id="moHotbar"></div>
+    <div class="mo-prompt hidden" id="moPrompt"></div>
+    <div class="mo-cross hidden" id="moCross"></div>
+    <div class="mo-buildinfo hidden" id="moBuildInfo"></div>
+    <div class="mo-float" id="moFloat"></div>
+    <div class="mo-keys" id="moKeys"></div>
+  </div>
+
+  <div id="moFade" class="mo-fade hidden"></div>
+  <div id="moIntro" class="mo-intro hidden"><div id="moIntroT" class="mo-introt hidden"><h1 id="moIntroH"></h1><p id="moIntroP"></p></div><small>Leertaste: überspringen</small></div>
+
+  <section id="moPanel" class="mo-panel hidden">
+    <div class="mo-pbox">
+      <header><h2 id="moPanelTitle"></h2><b id="moPanelCr"></b><button id="moClose" type="button">Schließen (Esc)</button></header>
+      <div class="tabs" id="moTabs"></div>
+      <div class="mo-items" id="moItems"></div>
+    </div>
+  </section>
+
+  <section id="moMap" class="mo-map hidden">
+    <div class="mo-mbox"><header><h2>Mondkarte</h2><button id="moMapClose" type="button">Schließen (Tab)</button></header><canvas id="moMapCv" width="720" height="720"></canvas><p id="moMapInfo"></p></div>
+  </section>
+
+  <div id="fatal" class="screen hidden"><div class="panel"><h2>Grafik nicht verfügbar</h2><p id="fatalMsg" class="sub"></p></div></div>
+  <!-- Schulmodus (2026-11-23): Dino-Lauf und Stapelturm, Hinweis oben -->
   <section id="dino" class="sc-spiel hidden">
     <canvas id="dnCanvas"></canvas>
     <div id="dnHud" class="sc-hud hidden"><b id="dnM">0 m</b><span id="dnBest"></span><button id="dnBack2" type="button" class="sc-weg"><kbd>Esc</kbd>Zurück</button></div>
@@ -126,11 +718,7 @@
     <div id="spOver" class="sc-over hidden"><div class="sc-karte"><h2>Turm fertig!</h2><p class="sc-gross" id="spOverZahl"></p><p class="sc-rek" id="spOverRek"></p><pre class="sc-rang" id="spOverRang"></pre>
       <div class="sc-knoepfe"><button id="spAgain" type="button" class="primary">Nochmal <kbd>Leertaste</kbd></button></div></div></div>
   </section>
-
-  <div class="hd-pad hidden" id="pgPad"><button type="button" data-key="KeyA" aria-label="links">◀</button><button type="button" data-key="KeyD" aria-label="rechts">▶</button></div>
-  <button type="button" id="dnDuck" class="hd-duck hidden">Ducken</button>
-  <div id="schulBadge" class="hidden"></div>
-  <div id="hdToast" class="hd-toast hidden"></div>
-  <script type="module" src="handy.js"></script>
+  <div id="schulBadge" class="schul-badge hidden" role="status">Schulmodus · Ton aus (<kbd>M</kbd>) · <kbd>N</kbd> schließt sofort</div>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Theos">
+  <title>Theos Seitenscheidel – Handy</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="schule.css">
+  <link rel="stylesheet" href="handy.css">
+</head>
+<body class="handy schule">
+  <canvas id="gl"></canvas>
+
+  <section id="home" class="hd-home">
+    <header class="hd-kopf">
+      <h1>Theos Seitenscheidel</h1>
+      <p class="hd-unter">Leichte Handy-Version · Version <span id="hdVersion"></span></p>
+    </header>
+    <label class="hd-name">Dein Name für die Rangliste <input id="hdName" type="text" maxlength="16" autocomplete="off" placeholder="z. B. Theo"></label>
+    <div class="hd-spiele">
+      <button type="button" class="hd-karte" data-spiel="stapel" style="--f:#46e0d0"><b>Stapelturm</b><small>Tippen im richtigen Moment, der Turm wächst.</small><em id="hdRekStapel"></em></button>
+      <button type="button" class="hd-karte" data-spiel="dino" style="--f:#7ed957"><b>Dino-Lauf</b><small>Tippen = springen, Knopf halten = ducken.</small><em id="hdRekDino"></em></button>
+      <button type="button" class="hd-karte" data-spiel="chess" style="--f:#d9b46a"><b>Dreierschach</b><small>Schach zu dritt, gegen die KI oder online.</small></button>
+      <button type="button" class="hd-karte" data-spiel="pong" style="--f:#9a6aff"><b>Quadrat-Pong</b><small>Pfeile unten bewegen deinen Schläger. Auch online.</small></button>
+      <button type="button" class="hd-karte" data-spiel="ships" style="--f:#4a90e8"><b>Schiffe versenken</b><small>Drei Flotten, du wählst dein Ziel. Auch online.</small></button>
+      <button type="button" class="hd-karte" data-spiel="rang" style="--f:#ffc34a"><b>Rangliste</b><small>Theo, Ludi, Bruno und du.</small></button>
+    </div>
+    <p class="hd-tipp"><a href="../" style="color:#ffc34a">Zum ganzen Spiel (alles wie am PC)</a> · Das hier ist die leichte Version für schwache Handys.</p>
+    <p id="hdInstall" class="hd-tipp">Tipp: Im Browser-Menü „Zum Startbildschirm hinzufügen“, dann startet Theos wie eine App und läuft auch ohne Internet. Für Online-Spiele mit Freunden braucht ihr Internet und dieselbe Version.</p>
+  </section>
+
+  <section id="rang" class="hd-rang hidden">
+    <div class="sc-karte hd-rangkarte"><h2>Rangliste</h2><div id="hdRangInhalt"></div><div class="sc-knoepfe"><button id="hdRangZu" type="button" class="primary">Zurück</button></div></div>
+  </section>
+
+  <section id="chess" class="cs hidden">
+    <div class="cs-table">
+      <div class="cs-boardwrap"><canvas id="csBoard"></canvas></div>
+      <aside class="cs-side">
+        <div class="cs-head"><h2>Dreierschach</h2><p id="csEnd"></p></div>
+        <div id="csStatus" class="cs-status"></div>
+        <div id="csSeats" class="cs-seats"></div>
+        <p id="csNote" class="cs-note"></p>
+        <div class="cs-actions"><button id="csHelp" type="button">Regeln</button><button id="csBack" type="button"><span id="csBackT">Verlassen</span></button></div>
+      </aside>
+    </div>
+    <div id="csSetup" class="cs-over hidden"><div class="cs-card">
+      <h2>Dreierschach</h2><p class="cs-lead">Schach zu dritt: Rot beginnt, dann Weiß, dann Schwarz.</p>
+      <p class="label">Wer spielt?</p><div class="cards cs-two" id="csWho"><button type="button" class="card" data-who="bots"><b>Gegen die KI</b><small>Du spielst Rot, zwei KI-Gegner</small></button><button type="button" class="card" data-who="local"><b>Zu dritt am PC</b><small>Das Brett dreht sich zum Spieler am Zug</small></button></div>
+      <p class="label">Spielende</p><div class="cards" id="csEnds"></div>
+      <p class="cs-mphint">Online zu dritt: im Startbildschirm auf „Mehrspieler“.</p>
+      <div class="foot"><button id="csSetupBack" type="button"><kbd>Esc</kbd>Zurück</button><button id="csRules" type="button">Regeln ansehen</button><button id="csGo" type="button" class="primary">Partie starten</button></div>
+    </div></div>
+    <div id="csTut" class="cs-over hidden"><div class="cs-card cs-tut">
+      <div class="cs-tutboard"><canvas id="csTutBoard"></canvas></div>
+      <div class="cs-tuttext"><p id="csTutStep" class="label"></p><h2 id="csTutTitle"></h2><p id="csTutText"></p><div id="csTutDots" class="cs-dots"></div>
+      <div class="foot"><button id="csTutSkip" type="button">Überspringen</button><button id="csTutPrev" type="button">Zurück</button><button id="csTutNext" type="button" class="primary">Weiter</button></div></div>
+    </div></div>
+    <div id="csPromo" class="cs-over hidden"><div class="cs-card cs-promo"><h2>Bauer umwandeln</h2><div id="csPromoBtns"></div></div></div>
+    <div id="csResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="csResTitle"></h2><p id="csResText"></p><div class="foot"><button id="csResBack" type="button">Verlassen</button><button id="csAgain" type="button" class="primary">Nochmal</button></div></div></div>
+  </section>
+  <section id="pong" class="cs pg-theme hidden">
+    <div class="cs-table">
+      <div class="cs-boardwrap"><canvas id="pgBoard"></canvas></div>
+      <aside class="cs-side">
+        <div class="cs-head"><h2>Quadrat-Pong</h2></div>
+        <div id="pgStatus" class="cs-status"></div>
+        <div id="pgSeats" class="cs-seats"></div>
+        
+        <p id="pgNote" class="cs-note">Halte den Ball von deiner Seite fern. Die Seite der KI ist nicht zu überwinden.</p>
+        <div class="cs-actions"><button id="pgHelp" type="button">Regeln</button><button id="pgBack" type="button"><span id="pgBackT">Verlassen</span></button></div>
+      </aside>
+    </div>
+    <div id="pgSetup" class="cs-over hidden"><div class="cs-card">
+      <h2>Quadrat-Pong</h2><p class="cs-lead">Drei Spieler, vier Seiten. Die vierte Seite hält immer die unbesiegbare KI.</p>
+      <p class="label">Wer spielt?</p><div class="cards cs-two" id="pgWho"><button type="button" class="card" data-who="bots"><b>Gegen die KI</b><small>Du spielst Rot, zwei KI-Gegner</small></button><button type="button" class="card" data-who="local"><b>Zu dritt am PC</b><small>Rot A D, Blau J L, Gelb Pfeiltasten</small></button></div>
+      <p class="cs-mphint">Online zu dritt: im Startbildschirm auf „Mehrspieler“.</p>
+      <div class="foot"><button id="pgSetupBack" type="button"><kbd>Esc</kbd>Zurück</button><button id="pgRules" type="button">Regeln ansehen</button><button id="pgGo" type="button" class="primary">Partie starten</button></div>
+    </div></div>
+    
+    <div id="pgResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="pgResTitle"></h2><p id="pgResText"></p><div class="foot"><button id="pgResBack" type="button">Verlassen</button><button id="pgAgain" type="button" class="primary">Nochmal</button></div></div></div>
+  </section>
+  <section id="ships" class="cs sh-theme hidden">
+    <div class="cs-table">
+      <div class="sh-main"><div id="shPlaceWrap" class="sh-place hidden"><div class="sh-sea"><canvas id="shPlace"></canvas></div></div><div id="shBattle" class="sh-battle"><div class="sh-col"><p id="shNameA" class="sh-name"></p><div class="sh-sea"><canvas id="shA"></canvas></div></div><div class="sh-col"><p id="shNameB" class="sh-name"></p><div class="sh-sea"><canvas id="shB"></canvas></div></div></div></div>
+      <aside class="cs-side">
+        <div class="cs-head"><h2>Schiffe versenken</h2></div>
+        <div id="shStatus" class="cs-status"></div>
+        <div id="shSeats" class="cs-seats"></div>
+        <div id="shOwnWrap" class="sh-own"><p class="sh-name">Deine Flotte</p><div class="sh-sea"><canvas id="shOwn"></canvas></div></div><div id="shPlaceBar" class="sh-bar hidden"><button id="shTurn" type="button">Drehen (R)</button><button id="shRandom" type="button">Zufall</button><button id="shClear" type="button">Leeren</button><button id="shReady" type="button" class="primary">Bereit</button></div><button id="shRadar" type="button">Radar</button>
+        <p id="shNote" class="cs-note"></p>
+        <div class="cs-actions"><button id="shHelp" type="button">Regeln</button><button id="shBack" type="button"><span id="shBackT">Verlassen</span></button></div>
+      </aside>
+    </div>
+    <div id="shSetup" class="cs-over hidden"><div class="cs-card">
+      <h2>Schiffe versenken</h2><p class="cs-lead">Drei Flotten, ein Sieger. Du wählst in jedem Zug, wen du angreifst.</p>
+      <p class="label">Wer spielt?</p><div class="cards cs-two" id="shWho"><button type="button" class="card" data-who="bots"><b>Gegen die KI</b><small>Du spielst Rot, zwei KI-Gegner</small></button><button type="button" class="card" data-who="local"><b>Zu dritt am PC</b><small>Reihum am Bildschirm, nicht spicken</small></button></div>
+      <p class="cs-mphint">Online zu dritt: im Startbildschirm auf „Mehrspieler“.</p>
+      <div class="foot"><button id="shSetupBack" type="button"><kbd>Esc</kbd>Zurück</button><button id="shRules" type="button">Regeln ansehen</button><button id="shGo" type="button" class="primary">Partie starten</button></div>
+    </div></div>
+    <div id="shCover" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Nicht spicken</p><h2 id="shCoverT"></h2><div class="foot"><button id="shCoverGo" type="button" class="primary">Ich bin dran</button></div></div></div>
+    <div id="shResult" class="cs-over hidden"><div class="cs-card cs-resultcard"><p class="label">Partie beendet</p><h2 id="shResTitle"></h2><p id="shResText"></p><div class="foot"><button id="shResBack" type="button">Verlassen</button><button id="shAgain" type="button" class="primary">Nochmal</button></div></div></div>
+  </section>
+  <section id="dino" class="sc-spiel hidden">
+    <canvas id="dnCanvas"></canvas>
+    <div id="dnHud" class="sc-hud hidden"><b id="dnM">0 m</b><span id="dnBest"></span><button id="dnBack2" type="button" class="sc-weg"><kbd>Esc</kbd>Zurück</button></div>
+    <div id="dnStart" class="sc-over"><div class="sc-karte"><h2>Dino-Lauf</h2><p>Der Dino muss zur Schule. Spring über Ranzen, Mülleimer und Bücher, duck dich unter Papierfliegern und Fußbällen. Je weiter, desto schneller.</p>
+      <ul class="sc-tasten"><li><kbd>Leertaste</kbd> oder <kbd>↑</kbd> springen, halten = höher</li><li><kbd>↓</kbd> ducken</li><li>Klick springt auch</li></ul>
+      <p id="dnStartRek" class="sc-rek"></p><div class="sc-knoepfe"><button id="dnBack" type="button">Zurück</button><button id="dnGo" type="button" class="primary">Los</button></div></div></div>
+    <div id="dnOver" class="sc-over hidden"><div class="sc-karte"><h2>Autsch!</h2><p class="sc-gross" id="dnOverM"></p><p class="sc-rek" id="dnOverRek"></p><pre class="sc-rang" id="dnOverRang"></pre>
+      <div class="sc-knoepfe"><button id="dnAgain" type="button" class="primary">Nochmal <kbd>Leertaste</kbd></button></div></div></div>
+  </section>
+  <section id="stapel" class="sc-spiel sc-3d hidden">
+    <div id="spTap" class="sc-tap"></div>
+    <div id="spHud" class="sc-hud sc-mitte hidden"><b id="spZahl">0</b><span id="spBest"></span><em id="spLob" class="sc-lob"></em><button id="spBack2" type="button" class="sc-weg"><kbd>Esc</kbd>Zurück</button></div>
+    <div id="spStart" class="sc-over"><div class="sc-karte"><h2>Stapelturm</h2><p>Die Platte gleitet über den Turm. Lass sie im richtigen Moment fallen: Was übersteht, wird abgeschnitten. Triffst du genau, bleibt alles dran, und nach drei genauen Treffern wächst die Platte wieder.</p>
+      <ul class="sc-tasten"><li>Klick, <kbd>Leertaste</kbd> oder <kbd>Enter</kbd> lässt fallen</li></ul>
+      <p id="spStartRek" class="sc-rek"></p><div class="sc-knoepfe"><button id="spBack" type="button">Zurück</button><button id="spGo" type="button" class="primary">Los</button></div></div></div>
+    <div id="spOver" class="sc-over hidden"><div class="sc-karte"><h2>Turm fertig!</h2><p class="sc-gross" id="spOverZahl"></p><p class="sc-rek" id="spOverRek"></p><pre class="sc-rang" id="spOverRang"></pre>
+      <div class="sc-knoepfe"><button id="spAgain" type="button" class="primary">Nochmal <kbd>Leertaste</kbd></button></div></div></div>
+  </section>
+  <section id="join" class="screen hidden">
+    <div class="panel wide">
+      <h2 id="mpTitle">Mehrspieler</h2>
+      <div id="mpEntry">
+        <p class="sub">Zusammen spielen, ohne Konto, ohne Router-Einstellungen und ohne Code: Einer erstellt eine Lobby, die anderen sehen sie unter „Offene Lobbys“ und treten per Klick bei.</p>
+        <label class="label" for="mpName">Dein Name</label><input id="mpName" class="mpinput" maxlength="16" value="Spieler" autocomplete="off">
+        <div class="mpcols">
+          <div class="mpbox"><h3>Lobby erstellen</h3><p class="note">Deine Lobby ist öffentlich: Alle, die das Spiel offen haben, sehen sie und können beitreten.</p><button id="mpHost" type="button" class="primary">Lobby erstellen</button></div>
+          <div class="mpbox"><h3>Offene Lobbys</h3><div id="mpOpen" class="mpopen"><p class="note">Noch nicht gesucht.</p></div><button id="mpScan" type="button">Aktualisieren</button></div>
+        </div>
+        <details class="mpcodejoin"><summary>Mit Code beitreten (Notlösung)</summary><label class="note" for="mpCode">Code vom Host eingeben</label><input id="mpCode" class="mpinput" maxlength="14" placeholder="BRUNO-4821" autocomplete="off"><button id="mpJoin" type="button" class="primary">Beitreten</button></details>
+      </div>
+      <div id="mpRoom" class="hidden">
+        <div class="mpcodebar"><div><p id="mpCodeLabel" class="label">Code für deine Freunde</p><p id="mpCodeShow" class="code">BRUNO-0000</p></div><button id="mpCopy" type="button">Code kopieren</button></div>
+        <div id="mpModeRow" class="mprow hidden"><p class="label">Was spielt ihr?</p><div class="seg"><button type="button" id="mpModeRace">Rennen</button><button type="button" id="mpModePark">Parken</button><button type="button" id="mpModeMoon">Moonsweeper 2</button><button type="button" id="mpModeChess">Dreierschach</button><button type="button" id="mpModePong">Quadrat-Pong</button><button type="button" id="mpModeShips">Schiffe versenken</button><button type="button" id="mpModeRaus">Raus mit dir!</button><button type="button" id="mpModeBaron">Besser als Monopoly (Besser als Bruno Referenz)</button><button type="button" id="mpModeSaege" class="mp-dog" aria-label="Hund">Hund</button><button type="button" id="mpModeKraft">Kraftprobe</button><button type="button" id="mpModeCasino">Teo's Casino</button><button type="button" id="mpModeStrom">Strom aus wegen Brunos Geschirrspüler</button><button type="button" id="mpModeBruno">Big Bruno kommt auf die Erde</button><button type="button" id="mpModeOzean">Trockne den Ozean aus</button></div></div>
+        <div id="mpChessRow" class="mprow hidden"><p class="label">Spielende</p><div class="seg"><button type="button" data-end="1">Erstes Matt</button><button type="button" data-end="2">Figuren erben</button><button type="button" data-end="3">Bis zum Letzten</button></div></div>
+        <p id="mpLobbyInfo" class="note"></p>
+        <div id="mpCaSlot" class="mpcaslot hidden"><label for="mpCaSel">Spielstand</label><select id="mpCaSel"></select><button id="mpCaNew" type="button">Neu</button><button id="mpCaRen" type="button">Umbenennen</button><button id="mpCaDel" type="button">Löschen</button><input id="mpCaName" class="hidden" type="text" maxlength="32"><button id="mpCaOk" type="button" class="primary hidden">OK</button><button id="mpCaCancel" type="button" class="hidden">Abbrechen</button></div>
+        <p class="label">Spieler: <span id="mpCount">1</span> von <span id="mpMax">3</span></p>
+        <div id="mpSlots" class="mpslots"></div>
+        <div id="mpRang" class="mprang hidden"><p class="label">Rangliste: wer hat die meisten Pokale?</p><ol id="mpRangListe"></ol></div>
+        <div class="foot"><button id="mpLeave" type="button">Lobby verlassen</button><button id="mpStart" type="button" class="primary">Spiel starten</button></div>
+      </div>
+      <p id="mpStatus" class="mpstatus">Nicht verbunden</p>
+      <div class="foot"><button id="jBack" type="button"><kbd>Esc</kbd>Zurück</button></div>
+    </div>
+  </section>
+
+  <div class="hd-pad hidden" id="pgPad"><button type="button" data-key="KeyA" aria-label="links">◀</button><button type="button" data-key="KeyD" aria-label="rechts">▶</button></div>
+  <button type="button" id="dnDuck" class="hd-duck hidden">Ducken</button>
+  <div id="schulBadge" class="hidden"></div>
+  <div id="hdToast" class="hd-toast hidden"></div>
+  <script type="module" src="handy.js"></script>
+</body>
+</html>

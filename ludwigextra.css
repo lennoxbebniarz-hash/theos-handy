@@ -1,0 +1,58 @@
+/* Ludwig Zigaretti: Abstimmung Paket 4 (Kumpel-Chat, Nachricht, eigene Marke). Farben der Personen setzt ludwigextraui.js. */
+
+/* Aufgabe oben links: Logo links, immer nur eine Aufgabe (ersetzt die Liste mit drei, Regeln in style.css bleiben die Grundlage) */
+.lw-quests { display: flex; align-items: flex-start; gap: 10px; width: 330px; padding: 10px 14px 12px 10px; }
+.lw-quests.hidden { display: none; }
+.lw-qlogo { flex: none; width: 54px; height: 54px; border-radius: 12px; background: radial-gradient(circle at 70% 30%, rgba(255, 122, 26, .3), rgba(255, 122, 26, 0) 70%), rgba(0, 0, 0, .25); }
+.lw-qlogo svg { display: block; width: 100%; height: 100%; }
+.lw-qglut { animation: lwQGlut 2.4s ease-in-out infinite; }
+.lw-qrauch { opacity: .7; animation: lwQRauch 3.2s ease-in-out infinite; }
+@keyframes lwQGlut { 50% { fill: #ffb347; } }
+@keyframes lwQRauch { 50% { opacity: .25; transform: translateY(-2px); } }
+.lw-qtext { flex: 1; min-width: 0; }
+.lw-quests .lw-qhead { margin-bottom: 5px; }
+.lw-quests .lw-qlist li { padding: 0 0 0 26px; background: none; box-shadow: none; }
+.lw-quests .lw-qlist li:first-child { background: none; box-shadow: none; }
+.lw-quests .lw-qlist li i { left: 0; top: 2px; }
+.lw-quests .lw-qlist li b { font-size: 16px; }
+.lw-quests .lw-qlist li small { margin-top: 4px; font-size: 13px; line-height: 1.35; color: #d9cfc0; }
+.lw-quests .lw-qlist li.neu { animation: lwQNeu .5s ease-out; }
+@keyframes lwQNeu { from { opacity: 0; transform: translateX(-14px); } }
+@media (prefers-reduced-motion: reduce) { .lw-qglut, .lw-qrauch, .lw-quests .lw-qlist li.neu { animation: none; } }
+.lw-razzia { position: absolute; z-index: 7; top: 228px; left: 50%; transform: translateX(-50%); min-width: 300px; padding: 10px 18px 12px; border-radius: 14px; background: rgba(40, 6, 8, .92); box-shadow: inset 0 0 0 2px #3a7aff, 0 0 24px rgba(58, 122, 255, .45); color: #fff; font: 600 14px/1.35 var(--schrift); pointer-events: none; }
+.lw-razzia.hidden { display: none; }
+.lw-razzia b { display: block; margin-bottom: 6px; font: 800 18px/1.2 var(--schrift); letter-spacing: .04em; color: #ffd0c8; }
+.lw-razzia ul { margin: 0; padding: 0; list-style: none; }
+.lw-razzia li { padding-left: 22px; position: relative; }
+.lw-razzia li::before { content: '○'; position: absolute; left: 2px; color: #ff9a8a; }
+.lw-razzia li.ok { color: #8dffb8; text-decoration: line-through; }
+.lw-razzia li.ok::before { content: '✓'; color: #8dffb8; }
+.lw-nachricht { position: absolute; z-index: 6; top: 150px; right: 18px; width: min(300px, 34vw); display: flex; flex-direction: column; gap: 3px; padding: 10px 14px; border-radius: 14px; background: rgba(18, 13, 10, .9); color: var(--papier); font: 600 15px/1.3 var(--schrift); pointer-events: none; }
+.lw-nachricht.hidden { display: none; }
+.lw-nachricht b { font-size: 13px; }
+.lw-nachricht.warn { box-shadow: inset 0 0 0 2px var(--glut); }
+
+.ph-chat.on { display: flex; flex-direction: column; }
+.pk-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 12px 14px; }
+.pk-msg { margin: 0 0 8px; padding: 7px 10px; border-radius: 12px 12px 12px 3px; background: rgba(255, 255, 255, .09); color: var(--papier); font: 500 13px/1.3 var(--schrift); text-align: left; overflow-wrap: anywhere; }
+.pk-msg b { display: block; margin-bottom: 2px; font-size: 11px; }
+.pk-msg.warn { box-shadow: inset 0 0 0 1px var(--glut); }
+.ph-cbadge { position: absolute; top: -6px; right: 12px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #ff3b30; color: #fff; font: 800 12px/20px var(--schrift); font-style: normal; text-align: center; }
+.ph-cbadge.hidden { display: none; }
+.ph-app .ph-cbadge { display: block; width: auto; box-shadow: none; transform: none; }
+.ph-app .ph-cbadge.hidden { display: none; }
+
+.os-marke { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 14px 18px; background: #171210; color: #f3ead8; font-family: var(--schrift); }
+.os-mbilder { display: flex; gap: 12px; margin-bottom: 8px; }
+.os-mbilder canvas { height: 132px; border-radius: 6px; }
+.os-mvor { width: 235px; }
+.os-mplakat { width: 99px; }
+.os-mlabel { display: block; margin: 8px 0 4px; color: #f3ead8; font: 700 13px var(--schrift); }
+.os-mname { box-sizing: border-box; width: 100%; padding: 8px 10px; border: 1px solid #6a503a; border-radius: 6px; background: #241b15; color: #fff; font: 700 18px var(--schrift); user-select: text; }
+.os-mfarben, .os-mzeichen { display: flex; flex-wrap: wrap; gap: 6px; }
+.os-mfarben button, .os-mzeichen button { flex: none; width: 38px; height: 34px; min-width: 0; padding: 0; border: 2px solid transparent; border-radius: 6px; box-shadow: none; }
+.os-mzeichen button { background: #2c211a; color: #f3ead8; font: 700 19px/1 'Segoe UI Symbol', sans-serif; }
+.os-mfarben button[aria-pressed="true"], .os-mzeichen button[aria-pressed="true"] { border-color: #fff; }
+.os-mfuss { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.os-mfuss .os-mok { flex: none; padding: 9px 18px; border-radius: 6px; background: #ff7a1a; color: #1c1208; font: 800 15px var(--schrift); }
+.os-minfo { margin: 0; color: #8dffb8; font-size: 13px; }

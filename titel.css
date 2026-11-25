@@ -1,0 +1,122 @@
+/* Theos Seitenscheidel - große Startbildschirme (titel.js). Jedes Spiel hat eigene Schrift und Knöpfe aus seiner Welt:
+   Ludwig = Zigaretten mit Glut, Strom = Sicherungsautomaten, Ozean = Stegbretter, die volllaufen, Big Bruno = Felsbrocken mit Lava.
+   Keine Schriftdateien: alles liegt Windows bei. */
+
+.tt-cover { position: fixed; inset: 0; z-index: 3; pointer-events: none; transition: opacity .55s ease; }
+.tt-cover.off { opacity: 0; }
+.tt-cover[data-mode='ludwig'] { background: linear-gradient(#1c6cc4, #f3b98c 58%, #cbb8dc); }
+.tt-cover[data-mode='strom'] { background: linear-gradient(#05080e, #101a26); }
+.tt-cover[data-mode='ozean'] { background: linear-gradient(#0b78c8, #e9dfc4 45%, #c9a06c); }
+.tt-cover[data-mode='bruno'] { background: linear-gradient(160deg, #03040a 55%, #0d2b5c); }
+
+.screen.titel { justify-content: flex-start; align-items: center; background: none; }
+.tt-col { position: relative; z-index: 1; width: min(760px, 36vw); min-width: 270px; max-height: 100%; margin-left: 5.5vw; padding: 2vh 0; display: flex; flex-direction: column; }
+.tt-logo { margin: 0; display: flex; flex-direction: column; align-items: flex-start; color: #fff; }
+.tt-logo span { display: block; white-space: nowrap; }
+.tt-slogan { margin: 1.8vh 0 2.6vh; max-width: 40ch; font: 600 clamp(15px, min(1.45vw, 2.7vh), 26px)/1.25 var(--schrift); }
+.tt-list { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(6px, 1.3vh, 14px); }
+
+.titel button.tt-btn { position: relative; isolation: isolate; width: min(clamp(280px, 27vw, 540px), 100%); min-height: clamp(36px, 6.3vh, 68px); padding: .4em 1.4em; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; font: 700 clamp(15px, min(1.4vw, 2.6vh), 25px)/1.1 var(--schrift); box-shadow: none; transition: transform .16s ease, background-color .16s ease, color .16s ease; }
+.titel button.tt-btn:hover { transform: translateX(6px); }
+.titel button.tt-btn:active { transform: translateX(3px); }
+.titel button.tt-btn:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.titel button.tt-btn b { font-weight: inherit; }
+.titel button.tt-btn small { display: block; max-width: 100%; margin-top: 3px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 clamp(12px, min(1.05vw, 2vh), 17px)/1.2 var(--schrift); opacity: .85; }
+
+.tt-box { width: min(clamp(320px, 30vw, 540px), 100%); padding: 16px; border-radius: 6px; background: var(--tt-panel); color: var(--tt-paneltext); }
+.tt-box label, .tt-boxh { display: block; margin: 0 0 8px; font: 700 18px/1.2 var(--schrift); }
+.tt-box input { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 4px; background: #fff; color: #16181c; font: 600 18px/1.2 var(--schrift); user-select: text; }
+.tt-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.tt-savelist { max-height: 36vh; overflow-y: auto; display: flex; flex-direction: column; }
+.tt-save { display: flex; align-items: center; gap: 6px; padding: 8px 0; border-top: 1px solid rgba(127, 127, 127, .35); }
+.tt-save:first-child { border-top: 0; }
+.tt-savetext { flex: 1; min-width: 0; }
+.tt-savetext b, .tt-savetext small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tt-savetext b { font: 700 16px/1.2 var(--schrift); }
+.tt-savetext small { margin-top: 2px; font: 500 12.5px/1.2 var(--schrift); opacity: .8; }
+.titel button.tt-mini { padding: 8px 11px; border-radius: 4px; background: rgba(127, 127, 127, .22); color: inherit; box-shadow: none; font: 700 14px/1 var(--schrift); }
+.titel button.tt-mini.primary { background: var(--tt-acc); color: var(--tt-accink); }
+.titel button.tt-mini:hover { filter: brightness(1.12); transform: none; }
+
+#ttGeburtstag { z-index: 2; }
+
+/* ---------------- Ludwig: Knöpfe sind Zigaretten, die gewählte brennt ---------------- */
+.titel[data-mode='ludwig'] { --tt-panel: rgba(255, 248, 234, .95); --tt-paneltext: #3a2014; --tt-acc: #ff7a1a; --tt-accink: #2a0c00; }
+.titel[data-mode='ludwig'] .tt-logo span:first-child { font: 700 clamp(58px, min(8.6vw, 15.5vh), 170px)/.92 'Sitka Banner', Georgia, serif; color: #fff7e6; text-shadow: 0 4px 0 #8a4a22, 0 12px 26px rgba(40, 20, 60, .28); }
+.titel[data-mode='ludwig'] .tt-logo span:last-child { margin: -.12em 0 0 .55em; font: 700 clamp(38px, min(5.2vw, 9.4vh), 104px)/1.05 'Segoe Script', cursive; color: #ffd15c; text-shadow: 0 3px 0 #a04a14; transform: rotate(-4deg); }
+.titel[data-mode='ludwig'] .tt-slogan { color: #43233a; }
+.titel[data-mode='ludwig'] button.tt-btn { padding-left: 80px; padding-right: 34px; color: #3a2014; border-radius: 7px 4px 4px 7px;
+  background:
+    radial-gradient(circle at 4px 5px, rgba(255, 228, 160, .8) 0 1.5px, transparent 2px) 0 0 / 11px 13px,
+    radial-gradient(circle at 8px 9px, rgba(110, 55, 15, .4) 0 1.5px, transparent 2px) 0 0 / 13px 11px,
+    #d5924a;
+  filter: drop-shadow(0 5px 6px rgba(70, 35, 70, .22)); }
+.titel[data-mode='ludwig'] button.tt-btn::before { content: ''; position: absolute; z-index: -1; left: 58px; right: 0; top: 0; bottom: 0; border-left: 5px solid #e9c064; border-radius: 0 4px 4px 0; background: linear-gradient(#fff, #f8f2e6 45%, #d9cfbf); }
+.titel[data-mode='ludwig'] button.tt-btn::after { content: ''; position: absolute; z-index: -1; right: -11px; top: 1px; bottom: 1px; width: 16px; border-radius: 3px 9px 9px 3px; background: linear-gradient(90deg, #8a8178, #b5aea6 50%, #77706a); transition: background .16s ease, box-shadow .16s ease; }
+.titel[data-mode='ludwig'] button.tt-btn.primary::after,
+.titel[data-mode='ludwig'] button.tt-btn:hover::after,
+.titel[data-mode='ludwig'] button.tt-btn:focus-visible::after { background: linear-gradient(90deg, #5a1606, #ff5a14 30%, #ffc04a 55%, #a33a12); box-shadow: 0 0 16px 4px rgba(255, 106, 26, .75); }
+
+/* ---------------- Strom: Schriftzug flackert mit der Lampe, Knöpfe sind Sicherungen ---------------- */
+.titel[data-mode='strom'] { --tt-panel: rgba(16, 22, 30, .95); --tt-paneltext: #e8edf2; --tt-acc: #ffd21a; --tt-accink: #141518; }
+.titel[data-mode='strom'] .tt-logo span:first-child { text-transform: uppercase; font: 700 clamp(62px, min(9.3vw, 17vh), 186px)/.9 var(--schrift); font-stretch: 75%; color: #ffd21a; opacity: calc(.4 + var(--tt-power, 1) * .6); text-shadow: 0 0 6px rgba(255, 210, 26, .7), 0 0 34px rgba(255, 170, 20, .45); }
+.titel[data-mode='strom'] .tt-logo span:last-child { margin-top: 1.4vh; padding: .28em .75em .22em; font: 700 clamp(17px, min(2.05vw, 3.7vh), 40px)/1.1 var(--schrift); color: #22231f; transform: rotate(-2deg);
+  background: linear-gradient(#d8d2bd, #bdb7a2);
+  clip-path: polygon(0 8%, 2% 0, 98% 3%, 100% 22%, 99% 45%, 100% 70%, 98% 100%, 1.5% 97%, 0 78%, 1% 50%); }
+.titel[data-mode='strom'] .tt-slogan { color: #c3d2e2; }
+.titel[data-mode='strom'] button.tt-btn { padding-left: 64px; border-radius: 4px; background: #202831; color: #e8edf2; }
+.titel[data-mode='strom'] button.tt-btn::before { content: ''; position: absolute; left: 14px; top: 50%; width: 30px; height: 34px; transform: translateY(-50%); border-radius: 3px; background: linear-gradient(#0c1015, #0c1015) 50% 88% / 18px 15px no-repeat, linear-gradient(#e03a2a, #e03a2a) 50% 14% / 18px 6px no-repeat, #cfd5da; }
+.titel[data-mode='strom'] button.tt-btn.primary::before,
+.titel[data-mode='strom'] button.tt-btn:hover::before,
+.titel[data-mode='strom'] button.tt-btn:focus-visible::before { background: linear-gradient(#0c1015, #0c1015) 50% 12% / 18px 15px no-repeat, linear-gradient(#37d46a, #37d46a) 50% 86% / 18px 6px no-repeat, #cfd5da; }
+.titel[data-mode='strom'] button.tt-btn:hover { background: #2c3744; color: #ffd21a; }
+.titel[data-mode='strom'] button.tt-btn.primary, .titel[data-mode='strom'] button.tt-btn.primary:hover { background: #ffd21a; color: #141518; }
+
+/* ---------------- Ozean: die Schrift läuft beim Öffnen leer, die Bretter laufen voll ---------------- */
+.titel[data-mode='ozean'] { --tt-panel: rgba(255, 246, 222, .95); --tt-paneltext: #123a5c; --tt-acc: #0e8fd8; --tt-accink: #fff; }
+.titel[data-mode='ozean'] .tt-logo { filter: drop-shadow(0 4px 0 #5f3d22); }
+.titel[data-mode='ozean'] .tt-logo span { padding-right: .06em; font: 900 clamp(38px, min(6.2vw, 10.6vh), 124px)/1.02 'Segoe UI Black', var(--schrift); color: transparent;
+  background: linear-gradient(#fff3d4 0 49.4%, #bff2ff 49.4% 51%, #22b5e6 51%, #0a63b4) 0 22% / 100% 200% no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+  animation: ttDrain 1.5s cubic-bezier(.5, 0, .3, 1) .5s backwards; }
+.titel[data-mode='ozean'] .tt-logo span:nth-child(2) { animation-delay: 1.15s; background-position: 0 32%; }
+.titel[data-mode='ozean'] .tt-logo span:nth-child(3) { animation-delay: 1.8s; background-position: 0 54%; }
+@keyframes ttDrain { from { background-position: 0 100%; } }
+.titel[data-mode='ozean'] .tt-slogan { color: #123a5c; }
+.titel[data-mode='ozean'] button.tt-btn { overflow: hidden; padding-left: 34px; border-radius: 3px; color: #fff6e2;
+  background: repeating-linear-gradient(178deg, rgba(255, 255, 255, .08) 0 2px, transparent 2px 9px), linear-gradient(#93653f, #74492b); }
+.titel[data-mode='ozean'] button.tt-btn:nth-child(odd) { rotate: -.6deg; }
+.titel[data-mode='ozean'] button.tt-btn:nth-child(even) { rotate: .5deg; }
+.titel[data-mode='ozean'] button.tt-btn::before { content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle, #3a2414 0 3px, transparent 3.6px) 6px 50% / 14px 14px no-repeat, radial-gradient(circle, #3a2414 0 3px, transparent 3.6px) calc(100% - 6px) 50% / 14px 14px no-repeat; }
+.titel[data-mode='ozean'] button.tt-btn::after { content: ''; position: absolute; z-index: -1; inset: 0; border-top: 3px solid #c4f3ff; background: linear-gradient(#22b5e6, #0a63b4); transform: translateY(103%); transition: transform .32s ease-out; }
+.titel[data-mode='ozean'] button.tt-btn:hover::after,
+.titel[data-mode='ozean'] button.tt-btn:focus-visible::after { transform: none; }
+.titel[data-mode='ozean'] button.tt-btn.primary::after { transform: none; }
+
+/* ---------------- Big Bruno: Felsbrocken mit Lava in der Unterkante ---------------- */
+.titel[data-mode='bruno'] { --tt-panel: rgba(16, 12, 14, .94); --tt-paneltext: #f2e6da; --tt-acc: #ff6a22; --tt-accink: #1c0903; }
+.titel[data-mode='bruno'] .tt-logo { filter: drop-shadow(0 0 16px rgba(255, 90, 24, .38)); }
+.titel[data-mode='bruno'] .tt-logo span:first-child { padding-right: .05em; text-transform: uppercase; font: 400 clamp(64px, min(9.1vw, 17vh), 180px)/1 Impact, var(--schrift); color: transparent;
+  background: linear-gradient(#f0e2d2 0 28%, #a88670 58%, #ff7a24 80%, #ffd060 94%);
+  -webkit-background-clip: text; background-clip: text; }
+.titel[data-mode='bruno'] .tt-logo span:last-child { font: 600 clamp(22px, min(2.9vw, 5.3vh), 58px)/1.05 var(--schrift); font-stretch: 85%; color: #a9d8ff; }
+.titel[data-mode='bruno'] .tt-slogan { color: #d6dbe6; }
+.titel[data-mode='bruno'] button.tt-btn { padding-left: 30px; color: #f2e6da; border-radius: 0;
+  background: linear-gradient(0deg, #8a3a1a 0 3px, rgba(138, 58, 26, 0) 3px), linear-gradient(105deg, #4a3a32, #2d2420 55%, #3d302a);
+  clip-path: polygon(1% 14%, 7% 0, 38% 5%, 71% 0, 96% 4%, 100% 42%, 98% 88%, 80% 100%, 44% 95%, 12% 100%, 0 80%); }
+.titel[data-mode='bruno'] button.tt-btn:hover,
+.titel[data-mode='bruno'] button.tt-btn:focus-visible { outline: none; color: #fff; background: linear-gradient(0deg, #ff6a22 0 5px, rgba(255, 106, 34, .38) 5px, rgba(255, 106, 34, 0) 70%), linear-gradient(105deg, #4a3a32, #2d2420 55%, #3d302a); }
+.titel[data-mode='bruno'] button.tt-btn.primary { color: #1c0903; background: linear-gradient(0deg, #ffd060 0 4px, #ff8a2a 4px, #f0561c); }
+.titel[data-mode='bruno'] button.tt-btn.primary:hover { background: linear-gradient(0deg, #fff0b0 0 5px, #ffa040 5px, #ff6a22); }
+
+/* niedriges Fenster (ab 800 x 480): alles rückt enger zusammen */
+@media (max-height: 560px) {
+  .tt-slogan { margin: 1.2vh 0 1.6vh; }
+  .tt-list { gap: 5px; }
+  .titel button.tt-btn { min-height: 34px; padding-top: .25em; padding-bottom: .25em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .titel *, .titel *::before, .titel *::after { animation: none !important; transition: none !important; }
+}
